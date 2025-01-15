@@ -6,7 +6,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Chip, CircularProgress } from "@mui/material";
+import { Avatar, Chip, CircularProgress } from "@mui/material";
 import { floatToTime } from "./utils";
 
 export default function BasicTable({ data, loading }) {
@@ -107,11 +107,15 @@ export default function BasicTable({ data, loading }) {
                   ) : (row?.ibo?.position || Infinity) <
                     (row?.kaan?.position || Infinity) ? (
                     <Chip
+                      avatar={
+                        <Avatar alt="İbrahim" src="/avatar/ibrahim.jpg" />
+                      }
                       label="İbrahim"
                       sx={{ backgroundColor: "#155E95", color: "white" }}
                     />
                   ) : (
                     <Chip
+                      avatar={<Avatar alt="İbrahim" src="/avatar/kaan.jpg" />}
                       label="Kaan"
                       sx={{ backgroundColor: "#EB5A3C", color: "white" }}
                     />
