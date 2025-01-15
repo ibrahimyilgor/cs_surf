@@ -162,14 +162,22 @@ function App() {
 
   return (
     <div style={{ maxWidth: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "center", margin: 10 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "center",
+          margin: 10,
+          flexWrap: "wrap", // Allow wrapping on smaller screens
+        }}
+      >
         <TextField
           id="outlined-basic"
           label="Map Name"
           variant="outlined"
           color="#212121"
           value={search}
-          sx={{ marginRight: 1 }}
+          sx={{ marginRight: 1, width: { xs: "100%", sm: "auto" } }} // 100% width on mobile, auto on larger screens
           onChange={(e) => setSearch(e.target.value)}
         />
         <ButtonGroup
@@ -180,13 +188,18 @@ function App() {
             ".MuiButtonGroup-grouped": {
               borderColor: "#212121",
             },
+            display: "flex",
+            flexWrap: "wrap", // Allow button wrapping on small screens
+            justifyContent: "center",
+            marginTop: { xs: 1, sm: 0 }, // Add space on small screens
+            width: { xs: "100%", sm: "auto" }, // Button group takes full width on mobile
           }}
         >
           {buttonMap.map((button) => {
             return (
               <Button
+                key={button.id} // Add a key prop
                 onClick={() => {
-                  // button.onClick();
                   setSelected(button.id);
                 }}
                 sx={{
@@ -197,6 +210,8 @@ function App() {
                     backgroundColor:
                       selected === button.id ? "#212121" : "lightgray",
                   },
+                  width: { xs: "100%", sm: "auto" }, // Buttons take full width on mobile
+                  marginBottom: 0, // Add some margin at the bottom
                 }}
               >
                 {button.name}
