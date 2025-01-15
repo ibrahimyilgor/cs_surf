@@ -183,6 +183,12 @@ function App() {
         setRes(
           tempRes.sort((a, b) => b?.map?.finishedCount - a?.map?.finishedCount)
         );
+      } else if (sort === "worldRecord") {
+        setRes(
+          tempRes.sort(
+            (a, b) => parseFloat(a?.map?.wr) - parseFloat(b?.map?.wr)
+          )
+        );
       } else {
         setRes(tempRes);
       }

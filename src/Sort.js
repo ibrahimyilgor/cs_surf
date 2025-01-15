@@ -34,6 +34,7 @@ export default function BasicSelect({ sort, setSort }) {
           <MenuItem value={"kaanTime"}>Kaan Time</MenuItem>
           <MenuItem value={"kaanRank"}>Kaan Rank</MenuItem>
           <MenuItem value={"finishedCount"}>Finished Count</MenuItem>
+          <MenuItem value={"worldRecord"}>World Record</MenuItem>
         </Select>
       </FormControl>
     </Box>

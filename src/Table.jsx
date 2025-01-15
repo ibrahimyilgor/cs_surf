@@ -17,6 +17,7 @@ export default function BasicTable({ data, loading }) {
           <TableRow>
             <TableCell sx={{ fontWeight: "bold" }}>ID</TableCell>
             <TableCell sx={{ fontWeight: "bold" }}>Map Name</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>World Record</TableCell>
             <TableCell align="right" sx={{ fontWeight: "bold" }}>
               İbrahim Time
             </TableCell>
@@ -55,6 +56,9 @@ export default function BasicTable({ data, loading }) {
                 </TableCell>
                 <TableCell component="th" scope="row">
                   {row?.map?.name}
+                </TableCell>
+                <TableCell component="th" scope="row">
+                  {floatToTime(row?.map?.wr)}
                 </TableCell>
                 <TableCell align="right">
                   {row?.ibo?.time ? (
