@@ -4,6 +4,7 @@ import BasicTable from "./Table";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import { TextField } from "@mui/material";
+import BasicSelect from "./Sort";
 
 function App() {
   const [ibo, setIbo] = useState([]);
@@ -15,6 +16,7 @@ function App() {
 
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(0);
+  const [sort, setSort] = useState("finishedCount");
 
   const buttonMap = useMemo(() => {
     return [
@@ -140,10 +142,55 @@ function App() {
         const kaanMap = kaan?.filter((i) => i.map === map.name);
         tempRes.push({ ibo: iboMap?.[0], kaan: kaanMap?.[0], map: map });
       });
-      setRes(tempRes.sort((a, b) => b.map.finishedCount - a.map.finishedCount));
+
+      if (sort === "name") {
+        setRes(
+          tempRes.sort((a, b) => a?.map?.name?.localeCompare(b?.map?.name))
+        );
+      } else if (sort === "ibrahimTime") {
+        setRes(
+          tempRes.sort(
+            (a, b) =>
+              parseFloat(a?.ibo?.time || Infinity) -
+              parseFloat(b?.ibo?.time || Infinity)
+          )
+        );
+      } else if (sort === "ibrahimRank") {
+        setRes(
+          tempRes.sort(
+            (a, b) =>
+              parseFloat(a?.ibo?.position || Infinity) -
+              parseFloat(b?.ibo?.position || Infinity)
+          )
+        );
+      } else if (sort === "kaanTime") {
+        setRes(
+          tempRes.sort(
+            (a, b) =>
+              parseFloat(a?.kaan?.time || Infinity) -
+              parseFloat(b?.kaan?.time || Infinity)
+          )
+        );
+        console.log("kaan", tempRes);
+      } else if (sort === "kaanTime") {
+        setRes(
+          tempRes.sort(
+            (a, b) =>
+              parseFloat(a?.kaan?.position || Infinity) -
+              parseFloat(b?.kaan?.position || Infinity)
+          )
+        );
+      } else if (sort === "finishedCount") {
+        setRes(
+          tempRes.sort((a, b) => b?.map?.finishedCount - a?.map?.finishedCount)
+        );
+      } else {
+        setRes(tempRes);
+      }
+
       // setRow(tempRes);
     }
-  }, [ibo, kaan, maps]);
+  }, [ibo, kaan, maps, sort]);
 
   useEffect(() => {
     let tempRes = [...res];
@@ -219,6 +266,7 @@ function App() {
             );
           })}
         </ButtonGroup>
+        <BasicSelect sort={sort} setSort={setSort} />
       </div>
       <BasicTable data={row} loading={!ibo || !kaan || !maps} />
     </div>
