@@ -171,8 +171,7 @@ function App() {
               parseFloat(b?.kaan?.time || Infinity)
           )
         );
-        console.log("kaan", tempRes);
-      } else if (sort === "kaanTime") {
+      } else if (sort === "kaanRank") {
         setRes(
           tempRes.sort(
             (a, b) =>
