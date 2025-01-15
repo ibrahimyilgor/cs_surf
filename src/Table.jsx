@@ -95,7 +95,7 @@ export default function BasicTable({ data, loading }) {
                     </>
                   ) : (
                     <span style={{ color: "red" }}>
-                      +{floatToTime(parseFloat(row?.map?.wr))}
+                      {floatToTime(parseFloat(row?.map?.wr))}
                     </span>
                   )}
                 </TableCell>
