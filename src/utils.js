@@ -3,6 +3,7 @@ export function floatToTime(floatTime) {
     return "-";
   }
   const totalSeconds = Math.floor(floatTime);
+  const milliseconds = Math.floor((floatTime - totalSeconds) * 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
@@ -14,5 +15,7 @@ export function floatToTime(floatTime) {
     seconds.toString().padStart(2, "0"),
   ].join(":");
 
-  return formattedTime;
+  const formattedMilliseconds = milliseconds.toString().padStart(3, "0");
+
+  return `${formattedTime}.${formattedMilliseconds}`;
 }

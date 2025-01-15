@@ -6,10 +6,10 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Chip } from "@mui/material";
+import { Chip, CircularProgress } from "@mui/material";
 import { floatToTime } from "./utils";
 
-export default function BasicTable({ data }) {
+export default function BasicTable({ data, loading }) {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -34,47 +34,93 @@ export default function BasicTable({ data }) {
             </TableCell>
           </TableRow>
         </TableHead>
-        <TableBody>
-          {data.map((row, index) => (
-            <TableRow
-              key={row?.map?.name || ""}
-              sx={{
-                "&:last-child td, &:last-child th": { border: 0 },
-                backgroundColor: index % 2 === 0 ? "#f5f5f5" : "#ffffff", // Alternate row colors
-              }}
-            >
-              <TableCell component="th" scope="row">
-                {index + 1}
-              </TableCell>
-              <TableCell component="th" scope="row">
-                {row?.map?.name}
-              </TableCell>
-              <TableCell align="right">{floatToTime(row?.ibo?.time)}</TableCell>
-              <TableCell align="right">{row?.ibo?.position || "-"}</TableCell>
-              <TableCell align="right">
-                {floatToTime(row?.kaan?.time)}
-              </TableCell>
-              <TableCell align="right">{row?.kaan?.position || "-"}</TableCell>
-              <TableCell align="right">
-                {(row?.ibo?.position || Infinity) ===
-                (row?.kaan?.position || Infinity) ? (
-                  "-"
-                ) : (row?.ibo?.position || Infinity) <
+        {loading ? (
+          <TableRow>
+            <TableCell colSpan={7} align="center">
+              <CircularProgress />
+            </TableCell>
+          </TableRow>
+        ) : (
+          <TableBody>
+            {data.map((row, index) => (
+              <TableRow
+                key={row?.map?.name || ""}
+                sx={{
+                  "&:last-child td, &:last-child th": { border: 0 },
+                  backgroundColor: index % 2 === 0 ? "#f5f5f5" : "#ffffff", // Alternate row colors
+                }}
+              >
+                <TableCell component="th" scope="row">
+                  {index + 1}
+                </TableCell>
+                <TableCell component="th" scope="row">
+                  {row?.map?.name}
+                </TableCell>
+                <TableCell align="right">
+                  {row?.ibo?.time ? (
+                    <>
+                      {floatToTime(row?.ibo?.time)}{" "}
+                      <span style={{ color: "red" }}>
+                        +
+                        {floatToTime(
+                          parseFloat(row?.ibo?.time) - parseFloat(row?.map?.wr)
+                        )}
+                      </span>
+                    </>
+                  ) : (
+                    <span style={{ color: "red" }}>
+                      +{floatToTime(parseFloat(row?.map?.wr))}
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell align="right">
+                  {(row?.ibo?.position || "-") +
+                    " / " +
+                    row?.map?.finishedCount}
+                </TableCell>
+                <TableCell align="right">
+                  {row?.kaan?.time ? (
+                    <>
+                      {floatToTime(row?.kaan?.time)}{" "}
+                      <span style={{ color: "red" }}>
+                        +
+                        {floatToTime(
+                          parseFloat(row?.kaan?.time) - parseFloat(row?.map?.wr)
+                        )}
+                      </span>
+                    </>
+                  ) : (
+                    <span style={{ color: "red" }}>
+                      +{floatToTime(parseFloat(row?.map?.wr))}
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell align="right">
+                  {(row?.kaan?.position || "-") +
+                    " / " +
+                    row?.map?.finishedCount}
+                </TableCell>
+                <TableCell align="right">
+                  {(row?.ibo?.position || Infinity) ===
                   (row?.kaan?.position || Infinity) ? (
-                  <Chip
-                    label="İbrahim"
-                    sx={{ backgroundColor: "#155E95", color: "white" }}
-                  />
-                ) : (
-                  <Chip
-                    label="Kaan"
-                    sx={{ backgroundColor: "#EB5A3C", color: "white" }}
-                  />
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+                    "-"
+                  ) : (row?.ibo?.position || Infinity) <
+                    (row?.kaan?.position || Infinity) ? (
+                    <Chip
+                      label="İbrahim"
+                      sx={{ backgroundColor: "#155E95", color: "white" }}
+                    />
+                  ) : (
+                    <Chip
+                      label="Kaan"
+                      sx={{ backgroundColor: "#EB5A3C", color: "white" }}
+                    />
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        )}
       </Table>
     </TableContainer>
   );
