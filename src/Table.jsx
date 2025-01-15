@@ -7,6 +7,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Chip } from "@mui/material";
+import { floatToTime } from "./utils";
 
 export default function BasicTable({ data }) {
   return (
@@ -48,9 +49,11 @@ export default function BasicTable({ data }) {
               <TableCell component="th" scope="row">
                 {row?.map?.name}
               </TableCell>
-              <TableCell align="right">{row?.ibo?.time || "-"}</TableCell>
+              <TableCell align="right">{floatToTime(row?.ibo?.time)}</TableCell>
               <TableCell align="right">{row?.ibo?.position || "-"}</TableCell>
-              <TableCell align="right">{row?.kaan?.time || "-"}</TableCell>
+              <TableCell align="right">
+                {floatToTime(row?.kaan?.time)}
+              </TableCell>
               <TableCell align="right">{row?.kaan?.position || "-"}</TableCell>
               <TableCell align="right">
                 {(row?.ibo?.position || Infinity) ===
