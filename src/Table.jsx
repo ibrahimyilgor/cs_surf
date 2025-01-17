@@ -6,16 +6,28 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Avatar, Chip, CircularProgress } from "@mui/material";
+import { Avatar, Box, Chip, CircularProgress, Modal } from "@mui/material";
 import { floatToTime } from "./utils";
 
 export default function BasicTable({ data, loading, setSort, sort }) {
+  const [openImage, setOpenImage] = React.useState(false);
+  const [map, setMap] = React.useState();
+
+  const handleOpen = (selectedMap) => {
+    setOpenImage(true);
+    setMap(selectedMap);
+  };
+  const handleClose = () => {
+    setOpenImage(false);
+    setMap();
+  };
+
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell sx={{ fontWeight: "bold" }}>{`No (Count:${
+            <TableCell sx={{ fontWeight: "bold" }} align="center">{`No (Count:${
               data?.length || 0
             })`}</TableCell>
             <TableCell
@@ -29,9 +41,9 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 }
               }}
               sx={{ fontWeight: "bold", cursor: "pointer" }}
+              align="center"
             >
-              Map Name{" "}
-              {sort === "nameAsc" ? "▲" : sort === "nameDesc" ? "▼" : ""}
+              Map {sort === "nameAsc" ? "▲" : sort === "nameDesc" ? "▼" : ""}
             </TableCell>
             <TableCell
               onClick={() => {
@@ -44,6 +56,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 }
               }}
               sx={{ fontWeight: "bold", cursor: "pointer" }}
+              align="center"
             >
               World Record{" "}
               {sort === "worldRecordAsc"
@@ -62,7 +75,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                   setSort("ibrahimTimeAsc");
                 }
               }}
-              align="left"
+              align="center"
               sx={{ fontWeight: "bold", cursor: "pointer" }}
             >
               İbrahim Time{" "}
@@ -82,7 +95,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                   setSort("ibrahimRankAsc");
                 }
               }}
-              align="left"
+              align="center"
               sx={{ fontWeight: "bold", cursor: "pointer" }}
             >
               İbrahim Rank{" "}
@@ -102,7 +115,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                   setSort("kaanTimeAsc");
                 }
               }}
-              align="left"
+              align="center"
               sx={{ fontWeight: "bold", cursor: "pointer" }}
             >
               Kaan Time{" "}
@@ -122,7 +135,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                   setSort("kaanRankAsc");
                 }
               }}
-              align="left"
+              align="center"
               sx={{ fontWeight: "bold", cursor: "pointer" }}
             >
               Kaan Rank{" "}
@@ -132,7 +145,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 ? "▼"
                 : ""}
             </TableCell>
-            <TableCell align="left" sx={{ fontWeight: "bold" }}>
+            <TableCell align="center" sx={{ fontWeight: "bold" }}>
               Who is better?
             </TableCell>
           </TableRow>
@@ -153,16 +166,33 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                   backgroundColor: index % 2 === 0 ? "#f5f5f5" : "#ffffff", // Alternate row colors
                 }}
               >
-                <TableCell component="th" scope="row">
+                <TableCell component="th" scope="row" align="center">
                   {index + 1}
                 </TableCell>
-                <TableCell component="th" scope="row">
-                  {row?.map?.name}
+                <TableCell component="th" scope="row" align="center">
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <img
+                      src={`https://cdn.xplay.cloud/img/site/common/maps/${row?.map?.name}.jpg`}
+                      height="60"
+                      width="60"
+                      alt={row?.map?.name}
+                      style={{ marginBottom: "8px", cursor: "pointer" }}
+                      onClick={() => handleOpen(row?.map?.name)}
+                    />
+                    <span>{row?.map?.name}</span>
+                  </div>
                 </TableCell>
-                <TableCell component="th" scope="row">
+
+                <TableCell component="th" scope="row" align="center">
                   {floatToTime(row?.map?.wr)}
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   <TimeColumn
                     colTime={row?.ibo?.time}
                     otherTime={row?.kaan?.time}
@@ -170,12 +200,12 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                     otherName={"Kaan"}
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   {(row?.ibo?.position || "-") +
                     " / " +
                     row?.map?.finishedCount}
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   <TimeColumn
                     colTime={row?.kaan?.time}
                     otherTime={row?.ibo?.time}
@@ -183,12 +213,12 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                     otherName={"İbrahim"}
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   {(row?.kaan?.position || "-") +
                     " / " +
                     row?.map?.finishedCount}
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   {(row?.ibo?.position || Infinity) ===
                   (row?.kaan?.position || Infinity) ? (
                     "-"
@@ -214,6 +244,36 @@ export default function BasicTable({ data, loading, setSort, sort }) {
           </TableBody>
         )}
       </Table>
+      <Modal open={openImage} onClose={handleClose}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <img
+            src={`https://cdn.xplay.cloud/img/site/common/maps/${map}.jpg`}
+            alt={map}
+            style={{ maxWidth: "100%", maxHeight: "80vh" }}
+          />
+          <span
+            style={{
+              marginTop: "16px",
+              fontSize: "1.2rem",
+            }}
+          >
+            {map}
+          </span>
+        </Box>
+      </Modal>
     </TableContainer>
   );
 }
@@ -225,7 +285,13 @@ const TimeColumn = ({
   otherName,
 }) => {
   return colTime !== Infinity ? (
-    <div style={{ display: "flex", flexDirection: "row" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "center",
+      }}
+    >
       {colTime ? floatToTime(colTime) : ""} {/* colTime */}
       {/* colTime - otherTime diff */}
       <div style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}>
