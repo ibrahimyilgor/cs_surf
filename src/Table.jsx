@@ -9,7 +9,7 @@ import Paper from "@mui/material/Paper";
 import { Avatar, Chip, CircularProgress } from "@mui/material";
 import { floatToTime } from "./utils";
 
-export default function BasicTable({ data, loading }) {
+export default function BasicTable({ data, loading, setSort, sort }) {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -18,28 +18,128 @@ export default function BasicTable({ data, loading }) {
             <TableCell sx={{ fontWeight: "bold" }}>{`No (Count:${
               data?.length || 0
             })`}</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Map Name</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>World Record</TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              İbrahim Time
+            <TableCell
+              onClick={() => {
+                if (sort === "nameAsc") {
+                  setSort("nameDesc");
+                } else if (sort === "nameDesc") {
+                  setSort("finishedCount");
+                } else {
+                  setSort("nameAsc");
+                }
+              }}
+              sx={{ fontWeight: "bold", cursor: "pointer" }}
+            >
+              Map Name{" "}
+              {sort === "nameAsc" ? "▲" : sort === "nameDesc" ? "▼" : ""}
             </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              İbrahim Rank
+            <TableCell
+              onClick={() => {
+                if (sort === "worldRecordAsc") {
+                  setSort("worldRecordDesc");
+                } else if (sort === "worldRecordDesc") {
+                  setSort("finishedCount");
+                } else {
+                  setSort("worldRecordAsc");
+                }
+              }}
+              sx={{ fontWeight: "bold", cursor: "pointer" }}
+            >
+              World Record{" "}
+              {sort === "worldRecordAsc"
+                ? "▲"
+                : sort === "worldRecordDesc"
+                ? "▼"
+                : ""}
             </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Kaan Time
+            <TableCell
+              onClick={() => {
+                if (sort === "ibrahimTimeAsc") {
+                  setSort("ibrahimTimeDesc");
+                } else if (sort === "ibrahimTimeDesc") {
+                  setSort("finishedCount");
+                } else {
+                  setSort("ibrahimTimeAsc");
+                }
+              }}
+              align="left"
+              sx={{ fontWeight: "bold", cursor: "pointer" }}
+            >
+              İbrahim Time{" "}
+              {sort === "ibrahimTimeAsc"
+                ? "▲"
+                : sort === "ibrahimTimeDesc"
+                ? "▼"
+                : ""}
             </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
-              Kaan Rank
+            <TableCell
+              onClick={() => {
+                if (sort === "ibrahimRankAsc") {
+                  setSort("ibrahimRankDesc");
+                } else if (sort === "ibrahimRankDesc") {
+                  setSort("finishedCount");
+                } else {
+                  setSort("ibrahimRankAsc");
+                }
+              }}
+              align="left"
+              sx={{ fontWeight: "bold", cursor: "pointer" }}
+            >
+              İbrahim Rank{" "}
+              {sort === "ibrahimRankAsc"
+                ? "▲"
+                : sort === "ibrahimRankDesc"
+                ? "▼"
+                : ""}
             </TableCell>
-            <TableCell align="right" sx={{ fontWeight: "bold" }}>
+            <TableCell
+              onClick={() => {
+                if (sort === "kaanTimeAsc") {
+                  setSort("kaanTimeDesc");
+                } else if (sort === "kaanTimeDesc") {
+                  setSort("finishedCount");
+                } else {
+                  setSort("kaanTimeAsc");
+                }
+              }}
+              align="left"
+              sx={{ fontWeight: "bold", cursor: "pointer" }}
+            >
+              Kaan Time{" "}
+              {sort === "kaanTimeAsc"
+                ? "▲"
+                : sort === "kaanTimeDesc"
+                ? "▼"
+                : ""}
+            </TableCell>
+            <TableCell
+              onClick={() => {
+                if (sort === "kaanRankAsc") {
+                  setSort("kaanRankDesc");
+                } else if (sort === "kaanRankDesc") {
+                  setSort("finishedCount");
+                } else {
+                  setSort("kaanRankAsc");
+                }
+              }}
+              align="left"
+              sx={{ fontWeight: "bold", cursor: "pointer" }}
+            >
+              Kaan Rank{" "}
+              {sort === "kaanRankAsc"
+                ? "▲"
+                : sort === "kaanRankDesc"
+                ? "▼"
+                : ""}
+            </TableCell>
+            <TableCell align="left" sx={{ fontWeight: "bold" }}>
               Who is better?
             </TableCell>
           </TableRow>
         </TableHead>
         {loading ? (
           <TableRow>
-            <TableCell colSpan={7} align="center">
+            <TableCell colSpan={8} align="center" sx={{ height: "100%" }}>
               <CircularProgress />
             </TableCell>
           </TableRow>
@@ -62,51 +162,33 @@ export default function BasicTable({ data, loading }) {
                 <TableCell component="th" scope="row">
                   {floatToTime(row?.map?.wr)}
                 </TableCell>
-                <TableCell align="right">
-                  {row?.ibo?.time ? (
-                    <>
-                      {floatToTime(row?.ibo?.time)}{" "}
-                      <span style={{ color: "red" }}>
-                        +
-                        {floatToTime(
-                          parseFloat(row?.ibo?.time) - parseFloat(row?.map?.wr)
-                        )}
-                      </span>
-                    </>
-                  ) : (
-                    <span style={{ color: "red" }}>
-                      {floatToTime(parseFloat(row?.map?.wr))}
-                    </span>
-                  )}
+                <TableCell>
+                  <TimeColumn
+                    colTime={row?.ibo?.time}
+                    otherTime={row?.kaan?.time}
+                    wr={row?.map?.wr}
+                    otherName={"Kaan"}
+                  />
                 </TableCell>
-                <TableCell align="right">
+                <TableCell>
                   {(row?.ibo?.position || "-") +
                     " / " +
                     row?.map?.finishedCount}
                 </TableCell>
-                <TableCell align="right">
-                  {row?.kaan?.time ? (
-                    <>
-                      {floatToTime(row?.kaan?.time)}{" "}
-                      <span style={{ color: "red" }}>
-                        +
-                        {floatToTime(
-                          parseFloat(row?.kaan?.time) - parseFloat(row?.map?.wr)
-                        )}
-                      </span>
-                    </>
-                  ) : (
-                    <span style={{ color: "red" }}>
-                      {floatToTime(parseFloat(row?.map?.wr))}
-                    </span>
-                  )}
+                <TableCell>
+                  <TimeColumn
+                    colTime={row?.kaan?.time}
+                    otherTime={row?.ibo?.time}
+                    wr={row?.map?.wr}
+                    otherName={"İbrahim"}
+                  />
                 </TableCell>
-                <TableCell align="right">
+                <TableCell>
                   {(row?.kaan?.position || "-") +
                     " / " +
                     row?.map?.finishedCount}
                 </TableCell>
-                <TableCell align="right">
+                <TableCell>
                   {(row?.ibo?.position || Infinity) ===
                   (row?.kaan?.position || Infinity) ? (
                     "-"
@@ -135,3 +217,42 @@ export default function BasicTable({ data, loading }) {
     </TableContainer>
   );
 }
+
+const TimeColumn = ({
+  colTime = Infinity,
+  otherTime = Infinity,
+  wr = Infinity,
+  otherName,
+}) => {
+  return colTime !== Infinity ? (
+    <div style={{ display: "flex", flexDirection: "row" }}>
+      {colTime ? floatToTime(colTime) : ""} {/* colTime */}
+      {/* colTime - otherTime diff */}
+      <div style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}>
+        {otherTime !== Infinity ? (
+          <span style={{ color: colTime > otherTime ? "red" : "green" }}>
+            {colTime > otherTime ? "+" : "-"}
+            {floatToTime(Math.abs(parseFloat(colTime) - parseFloat(otherTime)))}
+            {` (${otherName})`}
+          </span>
+        ) : (
+          ""
+        )}
+
+        {/* colTime - wr diff */}
+        {wr !== Infinity ? (
+          <span style={{ color: colTime > wr ? "red" : "green" }}>
+            {colTime > wr ? "+" : "-"}
+            {floatToTime(Math.abs(parseFloat(colTime) - parseFloat(wr)))}
+            {` (WR)`}
+          </span>
+        ) : (
+          ""
+        )}
+      </div>
+    </div>
+  ) : (
+    //empty if no colTime
+    <></>
+  );
+};

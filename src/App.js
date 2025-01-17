@@ -4,7 +4,7 @@ import BasicTable from "./Table";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import { TextField } from "@mui/material";
-import BasicSelect from "./Sort";
+// import SortBySelect from "./Sort";
 
 function App() {
   const [ibo, setIbo] = useState([]);
@@ -17,6 +17,8 @@ function App() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(0);
   const [sort, setSort] = useState("finishedCount");
+
+  const [loading, setLoading] = useState(false);
 
   const buttonMap = useMemo(() => {
     return [
@@ -129,9 +131,13 @@ function App() {
       }
     };
 
-    // Execute both fetches
-    fetchMaps();
-    fetchProfiles();
+    const fetchData = async () => {
+      setLoading(true); // Start loading
+      await Promise.all([fetchMaps(), fetchProfiles()]);
+      setLoading(false); // Stop loading
+    };
+
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -143,11 +149,15 @@ function App() {
         tempRes.push({ ibo: iboMap?.[0], kaan: kaanMap?.[0], map: map });
       });
 
-      if (sort === "name") {
+      if (sort === "nameAsc") {
         setRes(
           tempRes.sort((a, b) => a?.map?.name?.localeCompare(b?.map?.name))
         );
-      } else if (sort === "ibrahimTime") {
+      } else if (sort === "nameDesc") {
+        setRes(
+          tempRes.sort((a, b) => b?.map?.name?.localeCompare(a?.map?.name))
+        );
+      } else if (sort === "ibrahimTimeAsc") {
         setRes(
           tempRes.sort(
             (a, b) =>
@@ -155,7 +165,15 @@ function App() {
               parseFloat(b?.ibo?.time || Infinity)
           )
         );
-      } else if (sort === "ibrahimRank") {
+      } else if (sort === "ibrahimTimeDesc") {
+        setRes(
+          tempRes.sort(
+            (a, b) =>
+              parseFloat(b?.ibo?.time || Infinity) -
+              parseFloat(a?.ibo?.time || Infinity)
+          )
+        );
+      } else if (sort === "ibrahimRankAsc") {
         setRes(
           tempRes.sort(
             (a, b) =>
@@ -163,7 +181,15 @@ function App() {
               parseFloat(b?.ibo?.position || Infinity)
           )
         );
-      } else if (sort === "kaanTime") {
+      } else if (sort === "ibrahimRankDesc") {
+        setRes(
+          tempRes.sort(
+            (a, b) =>
+              parseFloat(b?.ibo?.position || Infinity) -
+              parseFloat(a?.ibo?.position || Infinity)
+          )
+        );
+      } else if (sort === "kaanTimeAsc") {
         setRes(
           tempRes.sort(
             (a, b) =>
@@ -171,7 +197,15 @@ function App() {
               parseFloat(b?.kaan?.time || Infinity)
           )
         );
-      } else if (sort === "kaanRank") {
+      } else if (sort === "kaanTimeDesc") {
+        setRes(
+          tempRes.sort(
+            (a, b) =>
+              parseFloat(b?.kaan?.time || Infinity) -
+              parseFloat(a?.kaan?.time || Infinity)
+          )
+        );
+      } else if (sort === "kaanRankAsc") {
         setRes(
           tempRes.sort(
             (a, b) =>
@@ -179,14 +213,28 @@ function App() {
               parseFloat(b?.kaan?.position || Infinity)
           )
         );
+      } else if (sort === "kaanRankDesc") {
+        setRes(
+          tempRes.sort(
+            (a, b) =>
+              parseFloat(b?.kaan?.position || Infinity) -
+              parseFloat(a?.kaan?.position || Infinity)
+          )
+        );
       } else if (sort === "finishedCount") {
         setRes(
           tempRes.sort((a, b) => b?.map?.finishedCount - a?.map?.finishedCount)
         );
-      } else if (sort === "worldRecord") {
+      } else if (sort === "worldRecordAsc") {
         setRes(
           tempRes.sort(
             (a, b) => parseFloat(a?.map?.wr) - parseFloat(b?.map?.wr)
+          )
+        );
+      } else if (sort === "worldRecordDesc") {
+        setRes(
+          tempRes.sort(
+            (a, b) => parseFloat(b?.map?.wr) - parseFloat(a?.map?.wr)
           )
         );
       } else {
@@ -271,9 +319,9 @@ function App() {
             );
           })}
         </ButtonGroup>
-        <BasicSelect sort={sort} setSort={setSort} />
+        {/* <SortBySelect sort={sort} setSort={setSort} /> */}
       </div>
-      <BasicTable data={row} loading={!ibo || !kaan || !maps} />
+      <BasicTable data={row} loading={loading} sort={sort} setSort={setSort} />
     </div>
   );
 }

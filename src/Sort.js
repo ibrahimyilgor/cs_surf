@@ -5,7 +5,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 
-export default function BasicSelect({ sort, setSort }) {
+export default function SortBySelect({ sort, setSort }) {
   const handleChange = (event) => {
     setSort(event.target.value);
   };
