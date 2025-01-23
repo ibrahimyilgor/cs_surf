@@ -70,6 +70,10 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 if (sort === "ibrahimTimeAsc") {
                   setSort("ibrahimTimeDesc");
                 } else if (sort === "ibrahimTimeDesc") {
+                  setSort("ibrahimTimeWrDiffAsc");
+                } else if (sort === "ibrahimTimeWrDiffAsc") {
+                  setSort("ibrahimTimeWrDiffDesc");
+                } else if (sort === "ibrahimTimeWrDiffDesc") {
                   setSort("finishedCount");
                 } else {
                   setSort("ibrahimTimeAsc");
@@ -80,9 +84,13 @@ export default function BasicTable({ data, loading, setSort, sort }) {
             >
               İbrahim Time{" "}
               {sort === "ibrahimTimeAsc"
-                ? "▲"
+                ? "▲ (Time Asc)"
                 : sort === "ibrahimTimeDesc"
-                ? "▼"
+                ? "▼ (Time Desc)"
+                : sort === "ibrahimTimeWrDiffAsc"
+                ? "▲ (WR Diff Asc)"
+                : sort === "ibrahimTimeWrDiffDesc"
+                ? "▼ (WR Diff Desc)"
                 : ""}
             </TableCell>
             <TableCell
@@ -110,6 +118,10 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 if (sort === "kaanTimeAsc") {
                   setSort("kaanTimeDesc");
                 } else if (sort === "kaanTimeDesc") {
+                  setSort("kaanTimeWrDiffAsc");
+                } else if (sort === "kaanTimeWrDiffAsc") {
+                  setSort("kaanTimeWrDiffDesc");
+                } else if (sort === "kaanTimeWrDiffDesc") {
                   setSort("finishedCount");
                 } else {
                   setSort("kaanTimeAsc");
@@ -120,9 +132,13 @@ export default function BasicTable({ data, loading, setSort, sort }) {
             >
               Kaan Time{" "}
               {sort === "kaanTimeAsc"
-                ? "▲"
+                ? "▲ (Time Asc)"
                 : sort === "kaanTimeDesc"
-                ? "▼"
+                ? "▼ (Time Desc)"
+                : sort === "kaanTimeWrDiffAsc"
+                ? "▲ (WR Diff Asc)"
+                : sort === "kaanTimeWrDiffDesc"
+                ? "▼ (WR Diff Desc)"
                 : ""}
             </TableCell>
             <TableCell
