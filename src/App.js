@@ -177,16 +177,16 @@ function App() {
         setRes(
           tempRes.sort(
             (a, b) =>
-              parseFloat(a?.map.wr - (a?.ibo?.time || Infinity)) -
-              parseFloat(b?.map.wr - (b?.ibo?.time || Infinity))
+              parseFloat((a?.ibo?.time || Infinity) - a?.map.wr) -
+              parseFloat((b?.ibo?.time || Infinity) - b?.map.wr)
           )
         );
       } else if (sort === "ibrahimTimeWrDiffDesc") {
         setRes(
           tempRes.sort(
             (a, b) =>
-              parseFloat(b?.map.wr - (b?.ibo?.time || Infinity)) -
-              parseFloat(a?.map.wr - (a?.ibo?.time || Infinity))
+              parseFloat((b?.ibo?.time || Infinity) - b?.map.wr) -
+              parseFloat((a?.ibo?.time || Infinity) - a?.map.wr)
           )
         );
       } else if (sort === "ibrahimRankAsc") {
@@ -225,16 +225,16 @@ function App() {
         setRes(
           tempRes.sort(
             (a, b) =>
-              parseFloat(a?.map.wr - (a?.kaan?.time || Infinity)) -
-              parseFloat(b?.map.wr - (b?.kaan?.time || Infinity))
+              parseFloat((a?.kaan?.time || Infinity) - a?.map.wr) -
+              parseFloat((b?.kaan?.time || Infinity) - b?.map.wr)
           )
         );
       } else if (sort === "kaanTimeWrDiffDesc") {
         setRes(
           tempRes.sort(
             (a, b) =>
-              parseFloat(b?.map.wr - (b?.kaan?.time || Infinity)) -
-              parseFloat(a?.map.wr - (a?.kaan?.time || Infinity))
+              parseFloat((b?.kaan?.time || Infinity) - b?.map.wr) -
+              parseFloat((a?.kaan?.time || Infinity) - a?.map.wr)
           )
         );
       } else if (sort === "kaanRankAsc") {
