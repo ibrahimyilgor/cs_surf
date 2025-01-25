@@ -8,6 +8,7 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Avatar, Box, Chip, CircularProgress, Modal } from "@mui/material";
 import { floatToTime } from "./utils";
+import MapModal from "./MapModal";
 
 export default function BasicTable({ data, loading, setSort, sort }) {
   const [openImage, setOpenImage] = React.useState(false);
@@ -198,8 +199,12 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                       height="60"
                       width="60"
                       alt={row?.map?.name}
-                      style={{ marginBottom: "8px", cursor: "pointer" }}
-                      onClick={() => handleOpen(row?.map?.name)}
+                      style={{
+                        marginBottom: "8px",
+                        cursor: "pointer",
+                        borderRadius: 10,
+                      }}
+                      onClick={() => handleOpen(row?.map)}
                     />
                     <span>{row?.map?.name}</span>
                   </div>
@@ -260,36 +265,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
           </TableBody>
         )}
       </Table>
-      <Modal open={openImage} onClose={handleClose}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <img
-            src={`https://cdn.xplay.cloud/img/site/common/maps/${map}.jpg`}
-            alt={map}
-            style={{ maxWidth: "100%", maxHeight: "80vh" }}
-          />
-          <span
-            style={{
-              marginTop: "16px",
-              fontSize: "1.2rem",
-            }}
-          >
-            {map}
-          </span>
-        </Box>
-      </Modal>
+      <MapModal open={openImage} handleClose={handleClose} map={map} />
     </TableContainer>
   );
 }

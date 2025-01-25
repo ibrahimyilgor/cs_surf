@@ -100,6 +100,7 @@ function App() {
             name: map,
             finishedCount: mapData?.data?.records?.length || 0,
             wr: mapData?.data?.records[0]?.time || 0,
+            mapData: mapData?.data?.records,
           };
         });
 
