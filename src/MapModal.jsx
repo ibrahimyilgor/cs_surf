@@ -1,18 +1,7 @@
-import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import {
-  Avatar,
-  Box,
-  Chip,
-  CircularProgress,
-  Modal,
-  Grid,
-  Grid2,
-  styled,
-  Button,
-} from "@mui/material";
+import { Box, Modal, Grid2, styled, Button } from "@mui/material";
 import { floatToTime } from "./utils";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function MapModal({ open, handleClose, map }) {
   const mapRanks = useMemo(() => {

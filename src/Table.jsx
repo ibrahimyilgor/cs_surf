@@ -6,9 +6,11 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Avatar, Box, Chip, CircularProgress, Modal } from "@mui/material";
+import { Avatar, Chip, CircularProgress } from "@mui/material";
 import { floatToTime } from "./utils";
 import MapModal from "./MapModal";
+import RankProgress from "./RankProgress";
+import TimeProgress from "./TimeProgress";
 
 export default function BasicTable({ data, loading, setSort, sort }) {
   const [openImage, setOpenImage] = React.useState(false);
@@ -184,7 +186,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 }}
               >
                 <TableCell component="th" scope="row" align="center">
-                  {index + 1}
+                  <b>{index + 1} </b>
                 </TableCell>
                 <TableCell component="th" scope="row" align="center">
                   <div
@@ -203,15 +205,17 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                         marginBottom: "8px",
                         cursor: "pointer",
                         borderRadius: 10,
+                        borderWidth: 1,
+                        borderStyle: "solid",
                       }}
                       onClick={() => handleOpen(row?.map)}
                     />
-                    <span>{row?.map?.name}</span>
+                    <b>{row?.map?.name}</b>
                   </div>
                 </TableCell>
 
                 <TableCell component="th" scope="row" align="center">
-                  {floatToTime(row?.map?.wr)}
+                  <b>{floatToTime(row?.map?.wr)} </b>
                 </TableCell>
                 <TableCell align="center">
                   <TimeColumn
@@ -222,9 +226,12 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                   />
                 </TableCell>
                 <TableCell align="center">
-                  {(row?.ibo?.position || "-") +
-                    " / " +
-                    row?.map?.finishedCount}
+                  <RankProgress
+                    rank={row?.ibo?.position}
+                    total={row?.map?.finishedCount}
+                    rankImage="avatar/ibrahim.jpg"
+                    name={"İbrahim"}
+                  />
                 </TableCell>
                 <TableCell align="center">
                   <TimeColumn
@@ -235,14 +242,17 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                   />
                 </TableCell>
                 <TableCell align="center">
-                  {(row?.kaan?.position || "-") +
-                    " / " +
-                    row?.map?.finishedCount}
+                  <RankProgress
+                    rank={row?.kaan?.position}
+                    total={row?.map?.finishedCount}
+                    rankImage="avatar/kaan.jpg"
+                    name={"Kaan"}
+                  />
                 </TableCell>
                 <TableCell align="center">
                   {(row?.ibo?.position || Infinity) ===
                   (row?.kaan?.position || Infinity) ? (
-                    "-"
+                    ""
                   ) : (row?.ibo?.position || Infinity) <
                     (row?.kaan?.position || Infinity) ? (
                     <Chip
@@ -250,13 +260,21 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                         <Avatar alt="İbrahim" src="/avatar/ibrahim.jpg" />
                       }
                       label="İbrahim"
-                      sx={{ backgroundColor: "#155E95", color: "white" }}
+                      sx={{
+                        backgroundColor: "#155E95",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
                     />
                   ) : (
                     <Chip
                       avatar={<Avatar alt="İbrahim" src="/avatar/kaan.jpg" />}
                       label="Kaan"
-                      sx={{ backgroundColor: "#EB5A3C", color: "white" }}
+                      sx={{
+                        backgroundColor: "#EB5A3C",
+                        color: "white",
+                        fontWeight: "bold",
+                      }}
                     />
                   )}
                 </TableCell>
@@ -270,47 +288,27 @@ export default function BasicTable({ data, loading, setSort, sort }) {
   );
 }
 
-const TimeColumn = ({
-  colTime = Infinity,
-  otherTime = Infinity,
-  wr = Infinity,
-  otherName,
-}) => {
-  return colTime !== Infinity ? (
+const TimeColumn = ({ colTime, otherTime, wr, rankImage, otherName }) => {
+  return (
     <div
       style={{
         display: "flex",
-        flexDirection: "row",
-        justifyContent: "center",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
       }}
     >
-      {colTime ? floatToTime(colTime) : ""} {/* colTime */}
-      {/* colTime - otherTime diff */}
-      <div style={{ display: "flex", flexDirection: "column", marginLeft: 5 }}>
-        {otherTime !== Infinity ? (
-          <span style={{ color: colTime > otherTime ? "red" : "green" }}>
-            {colTime > otherTime ? "+" : "-"}
-            {floatToTime(Math.abs(parseFloat(colTime) - parseFloat(otherTime)))}
-            {` (${otherName})`}
-          </span>
-        ) : (
-          ""
-        )}
+      {/* Rank Progress at the top */}
 
-        {/* colTime - wr diff */}
-        {wr !== Infinity ? (
-          <span style={{ color: colTime > wr ? "red" : "green" }}>
-            {colTime > wr ? "+" : "-"}
-            {floatToTime(Math.abs(parseFloat(colTime) - parseFloat(wr)))}
-            {` (WR)`}
-          </span>
-        ) : (
-          ""
-        )}
+      <div style={{ width: "100%", marginBottom: 10 }}>
+        <TimeProgress
+          colTime={colTime}
+          otherTime={otherTime}
+          rankImage={rankImage}
+          wr={wr}
+          otherName={otherName}
+        />
       </div>
     </div>
-  ) : (
-    //empty if no colTime
-    <></>
   );
 };
