@@ -1,7 +1,8 @@
 import Paper from "@mui/material/Paper";
-import { Box, Modal, Grid2, styled, Button } from "@mui/material";
+import { Box, Modal, Grid2, styled } from "@mui/material";
 import { floatToTime } from "./utils";
 import { useEffect, useMemo, useState } from "react";
+import { profileInfo } from "./constants";
 
 export default function MapModal({ open, handleClose, map }) {
   const mapRanks = useMemo(() => {
@@ -19,27 +20,35 @@ export default function MapModal({ open, handleClose, map }) {
   const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: "#fff",
     ...theme.typography.body2,
-    padding: theme.spacing(1),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
     textAlign: "center",
     color: theme.palette.text.secondary,
     ...theme.applyStyles("dark", {
       backgroundColor: "#1A2027",
     }),
     overflow: "hidden",
-    marginBottom: 2,
+    width: "60%",
+    borderBottomRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    boxShadow: "rgba(0, 0, 0, 0.2) 1px 1px 1px 2px",
   }));
 
-  const ItemButton = styled(Button)(({ theme }) => ({
+  const ItemBottom = styled(Paper)(({ theme }) => ({
     backgroundColor: "#fff",
     ...theme.typography.body2,
-    padding: theme.spacing(1),
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
     textAlign: "center",
     color: theme.palette.text.secondary,
-    "&:hover": {
-      backgroundColor: theme.palette.action.hover,
-    },
+    ...theme.applyStyles("dark", {
+      backgroundColor: "#1A2027",
+    }),
     overflow: "hidden",
-    marginBottom: theme.spacing(2),
+    width: "60%",
+    borderTopRightRadius: 0,
+    borderTopLeftRadius: 0,
+    boxShadow: "rgba(0, 0, 0, 0.2) 1px 1px 1px 2px",
   }));
 
   return (
@@ -66,7 +75,7 @@ export default function MapModal({ open, handleClose, map }) {
           spacing={2}
           columns={1}
           marginBottom={2}
-          sx={{ width: "100%", height: "60%" }}
+          sx={{ width: "100%" }}
         >
           <Grid2
             size={1}
@@ -75,6 +84,7 @@ export default function MapModal({ open, handleClose, map }) {
               flexDirection: "column",
               alignItems: "center",
               alignContent: "center",
+              height: "fit-content",
             }}
           >
             <Item>
@@ -85,50 +95,137 @@ export default function MapModal({ open, handleClose, map }) {
               style={{
                 height: "50%",
                 width: "60%",
-                borderRadius: 10,
                 topMargin: 4,
+                boxShadow: "rgba(0, 0, 0, 0.25) 1px 1px 1px 2px",
               }}
               alt={map?.name}
             />
-
-            <ItemButton
-              onClick={() => {
-                setShowRanks((x) => !x);
-              }}
-            >
-              Show Ranks
-            </ItemButton>
+            <ItemBottom>
+              <b
+                style={{ cursor: "pointer" }}
+                onClick={() => {
+                  setShowRanks((x) => !x);
+                }}
+              >
+                Show Ranks
+              </b>
+            </ItemBottom>
           </Grid2>
         </Grid2>
 
         {showRanks && (
-          <Grid2 container spacing={2} columns={7}>
-            <Grid2 size={2}>
+          <Grid2 container spacing={1} columns={7}>
+            <Grid2 size={2} sx={{ justifyContent: "center", display: "flex" }}>
               <Item>
                 <b>Position</b>
               </Item>
             </Grid2>
-            <Grid2 size={3}>
+            <Grid2 size={3} sx={{ justifyContent: "center", display: "flex" }}>
               <Item>
                 <b>Time Complete</b>
               </Item>
             </Grid2>
-            <Grid2 size={2}>
+            <Grid2 size={2} sx={{ justifyContent: "center", display: "flex" }}>
               <Item>
                 <b>Player</b>
               </Item>
             </Grid2>
             {mapRanks?.map((record, index) => (
-              <Grid2 item xs={6} sx={{ width: "100%" }} key={index}>
+              <Grid2
+                item
+                xs={6}
+                sx={{
+                  width: "100%",
+                }}
+                key={index}
+              >
                 <Grid2 container spacing={2} columns={7}>
-                  <Grid2 size={2}>
-                    <Item>{index + 1}</Item>
+                  <Grid2
+                    size={2}
+                    sx={{ justifyContent: "center", display: "flex" }}
+                  >
+                    <Item
+                      sx={{
+                        borderWidth: Object.values(profileInfo)
+                          .map((profile) => profile.id)
+                          .includes(record?.accountID.toString())
+                          ? 3
+                          : 0,
+                        borderStyle: Object.values(profileInfo)
+                          .map((profile) => profile.id)
+                          .includes(record?.accountID.toString())
+                          ? "solid"
+                          : "none",
+                        borderColor: Object.values(profileInfo)
+                          .map((profile) => profile.id)
+                          .includes(record?.accountID.toString())
+                          ? Object.values(profileInfo).find(
+                              (profile) =>
+                                profile.id === record.accountID.toString()
+                            )?.color
+                          : "none",
+                      }}
+                    >
+                      {index + 1}
+                    </Item>
                   </Grid2>
-                  <Grid2 size={3}>
-                    <Item>{floatToTime(record.time)}</Item>
+                  <Grid2
+                    size={3}
+                    sx={{ justifyContent: "center", display: "flex" }}
+                  >
+                    <Item
+                      sx={{
+                        borderWidth: Object.values(profileInfo)
+                          .map((profile) => profile.id)
+                          .includes(record?.accountID.toString())
+                          ? 3
+                          : 0,
+                        borderStyle: Object.values(profileInfo)
+                          .map((profile) => profile.id)
+                          .includes(record?.accountID.toString())
+                          ? "solid"
+                          : "none",
+                        borderColor: Object.values(profileInfo)
+                          .map((profile) => profile.id)
+                          .includes(record?.accountID.toString())
+                          ? Object.values(profileInfo).find(
+                              (profile) =>
+                                profile.id === record.accountID.toString()
+                            )?.color
+                          : "none",
+                      }}
+                    >
+                      {floatToTime(record.time)}
+                    </Item>
                   </Grid2>
-                  <Grid2 size={2}>
-                    <Item>{record.name}</Item>
+                  <Grid2
+                    size={2}
+                    sx={{ justifyContent: "center", display: "flex" }}
+                  >
+                    <Item
+                      sx={{
+                        borderWidth: Object.values(profileInfo)
+                          .map((profile) => profile.id)
+                          .includes(record?.accountID.toString())
+                          ? 3
+                          : 0,
+                        borderStyle: Object.values(profileInfo)
+                          .map((profile) => profile.id)
+                          .includes(record?.accountID.toString())
+                          ? "solid"
+                          : "none",
+                        borderColor: Object.values(profileInfo)
+                          .map((profile) => profile.id)
+                          .includes(record?.accountID.toString())
+                          ? Object.values(profileInfo).find(
+                              (profile) =>
+                                profile.id === record.accountID.toString()
+                            )?.color
+                          : "none",
+                      }}
+                    >
+                      {record.name}
+                    </Item>
                   </Grid2>
                 </Grid2>
               </Grid2>

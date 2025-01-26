@@ -1,14 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import BasicTable from "./Table";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import { TextField } from "@mui/material";
+import { profileInfo } from "./constants";
 // import SortBySelect from "./Sort";
 
 function App() {
-  const [ibo, setIbo] = useState([]);
-  const [kaan, setKaan] = useState([]);
+  const [profiles, setProfiles] = useState({});
+
   const [maps, setMaps] = useState([]);
 
   const [res, setRes] = useState([]);
@@ -19,6 +20,8 @@ function App() {
   const [sort, setSort] = useState("finishedCount");
 
   const [loading, setLoading] = useState(false);
+
+  const topRef = useRef(null);
 
   const buttonMap = useMemo(() => {
     return [
@@ -34,7 +37,8 @@ function App() {
         name: "KAAN IS BETTER",
         onClick: (res) => {
           return res.filter(
-            (item) => item?.kaan?.position < (item?.ibo?.position ?? Infinity)
+            (item) =>
+              item?.kaan?.position < (item?.ibrahim?.position ?? Infinity)
           );
         },
       },
@@ -43,7 +47,8 @@ function App() {
         name: "IBRAHIM IS BETTER",
         onClick: (res) => {
           return res.filter(
-            (item) => item?.ibo?.position < (item?.kaan?.position ?? Infinity)
+            (item) =>
+              item?.ibrahim?.position < (item?.kaan?.position ?? Infinity)
           );
         },
       },
@@ -51,28 +56,28 @@ function App() {
         id: 3,
         name: "BOTH FINISHED",
         onClick: (res) => {
-          return res.filter((item) => item?.ibo && item.kaan);
+          return res.filter((item) => item?.ibrahim && item.kaan);
         },
       },
       {
         id: 4,
         name: "ONLY KAAN FINISHED",
         onClick: (res) => {
-          return res.filter((item) => item.kaan && !item?.ibo);
+          return res.filter((item) => item.kaan && !item?.ibrahim);
         },
       },
       {
         id: 5,
         name: "ONLY IBRAHIM FINISHED",
         onClick: (res) => {
-          return res.filter((item) => item?.ibo && !item.kaan);
+          return res.filter((item) => item?.ibrahim && !item.kaan);
         },
       },
       {
         id: 6,
         name: "NOONE FINISHED",
         onClick: (res) => {
-          return res.filter((item) => !item?.ibo && !item.kaan);
+          return res.filter((item) => !item?.ibrahim && !item.kaan);
         },
       },
     ];
@@ -92,7 +97,7 @@ function App() {
         // Fetch details for each map
         const mapDetailsPromises = mapsData.data.surf.map(async (map) => {
           const mapDataResponse = await fetch(
-            `https://surf.xplay.gg/api/leaderboard/data?mapName=${map}&page=1&limit=18000`
+            `https://surf.xplay.gg/api/leaderboard/data?mapName=${map}&page=1&limit=1000000`
           );
           const mapData = await mapDataResponse.json();
 
@@ -114,19 +119,25 @@ function App() {
 
     const fetchProfiles = async () => {
       try {
-        // Fetch İbrahim's data
-        const iboResponse = await fetch(
-          "https://surf.xplay.gg/api/leaderboard/profile?accountId=376043163"
+        const profilePromises = Object.entries(profileInfo).map(
+          async ([name, info]) => {
+            const response = await fetch(
+              `https://surf.xplay.gg/api/leaderboard/profile?accountId=${info?.id}`
+            );
+            const data = await response.json();
+            return { name, records: data?.data?.records?.surf };
+          }
         );
-        const iboData = await iboResponse.json();
-        setIbo(iboData?.data?.records?.surf);
 
-        // Fetch Kaan's data
-        const kaanResponse = await fetch(
-          "https://surf.xplay.gg/api/leaderboard/profile?accountId=136540238"
+        const profilesArray = await Promise.all(profilePromises);
+
+        // Update profiles state dynamically
+        const profilesObject = profilesArray.reduce(
+          (acc, { name, records }) => ({ ...acc, [name]: records }),
+          {}
         );
-        const kaanData = await kaanResponse.json();
-        setKaan(kaanData?.data?.records?.surf);
+
+        setProfiles(profilesObject);
       } catch (error) {
         console.error("Error fetching profiles:", error);
       }
@@ -142,141 +153,69 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (ibo && kaan && maps) {
+    if (profiles && maps) {
       let tempRes = [];
       maps.forEach((map) => {
-        const iboMap = ibo?.filter((i) => i.map === map.name);
-        const kaanMap = kaan?.filter((i) => i.map === map.name);
-        tempRes.push({ ibo: iboMap?.[0], kaan: kaanMap?.[0], map: map });
+        const mapData = Object.entries(profiles).reduce(
+          (acc, [name, records]) => {
+            const userMap = records?.find((record) => record.map === map.name);
+            return { ...acc, [name]: userMap };
+          },
+          {}
+        );
+        tempRes.push({ ...mapData, map });
       });
 
-      if (sort === "nameAsc") {
-        setRes(
-          tempRes.sort((a, b) => a?.map?.name?.localeCompare(b?.map?.name))
-        );
-      } else if (sort === "nameDesc") {
-        setRes(
-          tempRes.sort((a, b) => b?.map?.name?.localeCompare(a?.map?.name))
-        );
-      } else if (sort === "ibrahimTimeAsc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat(a?.ibo?.time || Infinity) -
-              parseFloat(b?.ibo?.time || Infinity)
-          )
-        );
-      } else if (sort === "ibrahimTimeDesc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat(b?.ibo?.time || Infinity) -
-              parseFloat(a?.ibo?.time || Infinity)
-          )
-        );
-      } else if (sort === "ibrahimTimeWrDiffAsc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat((a?.ibo?.time || Infinity) - a?.map.wr) -
-              parseFloat((b?.ibo?.time || Infinity) - b?.map.wr)
-          )
-        );
-      } else if (sort === "ibrahimTimeWrDiffDesc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat((b?.ibo?.time || Infinity) - b?.map.wr) -
-              parseFloat((a?.ibo?.time || Infinity) - a?.map.wr)
-          )
-        );
-      } else if (sort === "ibrahimRankAsc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat(a?.ibo?.position || Infinity) -
-              parseFloat(b?.ibo?.position || Infinity)
-          )
-        );
-      } else if (sort === "ibrahimRankDesc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat(b?.ibo?.position || Infinity) -
-              parseFloat(a?.ibo?.position || Infinity)
-          )
-        );
-      } else if (sort === "kaanTimeAsc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat(a?.kaan?.time || Infinity) -
-              parseFloat(b?.kaan?.time || Infinity)
-          )
-        );
-      } else if (sort === "kaanTimeDesc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat(b?.kaan?.time || Infinity) -
-              parseFloat(a?.kaan?.time || Infinity)
-          )
-        );
-      } else if (sort === "kaanTimeWrDiffAsc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat((a?.kaan?.time || Infinity) - a?.map.wr) -
-              parseFloat((b?.kaan?.time || Infinity) - b?.map.wr)
-          )
-        );
-      } else if (sort === "kaanTimeWrDiffDesc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat((b?.kaan?.time || Infinity) - b?.map.wr) -
-              parseFloat((a?.kaan?.time || Infinity) - a?.map.wr)
-          )
-        );
-      } else if (sort === "kaanRankAsc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat(a?.kaan?.position || Infinity) -
-              parseFloat(b?.kaan?.position || Infinity)
-          )
-        );
-      } else if (sort === "kaanRankDesc") {
-        setRes(
-          tempRes.sort(
-            (a, b) =>
-              parseFloat(b?.kaan?.position || Infinity) -
-              parseFloat(a?.kaan?.position || Infinity)
-          )
-        );
-      } else if (sort === "finishedCount") {
-        setRes(
-          tempRes.sort((a, b) => b?.map?.finishedCount - a?.map?.finishedCount)
-        );
-      } else if (sort === "worldRecordAsc") {
-        setRes(
-          tempRes.sort(
-            (a, b) => parseFloat(a?.map?.wr) - parseFloat(b?.map?.wr)
-          )
-        );
-      } else if (sort === "worldRecordDesc") {
-        setRes(
-          tempRes.sort(
-            (a, b) => parseFloat(b?.map?.wr) - parseFloat(a?.map?.wr)
-          )
-        );
-      } else {
-        setRes(tempRes);
-      }
+      const sortingFunctions = {
+        nameAsc: (a, b) => a?.map?.name?.localeCompare(b?.map?.name),
+        nameDesc: (a, b) => b?.map?.name?.localeCompare(a?.map?.name),
+        finishedCount: (a, b) => b?.map?.finishedCount - a?.map?.finishedCount,
+        worldRecordAsc: (a, b) =>
+          parseFloat(a?.map?.wr) - parseFloat(b?.map?.wr),
+        worldRecordDesc: (a, b) =>
+          parseFloat(b?.map?.wr) - parseFloat(a?.map?.wr),
+      };
 
-      // setRow(tempRes);
+      // Dynamically add sorting logic for each ID in IDS
+      Object.keys(profileInfo).forEach((key) => {
+        sortingFunctions[`${key}TimeAsc`] = (a, b) =>
+          parseFloat(a?.[key]?.time || Infinity) -
+          parseFloat(b?.[key]?.time || Infinity);
+
+        sortingFunctions[`${key}TimeDesc`] = (a, b) =>
+          parseFloat(b?.[key]?.time || Infinity) -
+          parseFloat(a?.[key]?.time || Infinity);
+
+        sortingFunctions[`${key}TimeWrDiffAsc`] = (a, b) =>
+          parseFloat((a?.[key]?.time || Infinity) - a?.map?.wr) -
+          parseFloat((b?.[key]?.time || Infinity) - b?.map?.wr);
+
+        sortingFunctions[`${key}TimeWrDiffDesc`] = (a, b) =>
+          parseFloat((b?.[key]?.time || Infinity) - b?.map?.wr) -
+          parseFloat((a?.[key]?.time || Infinity) - a?.map?.wr);
+
+        sortingFunctions[`${key}RankAsc`] = (a, b) =>
+          parseFloat(a?.[key]?.position || Infinity) -
+          parseFloat(b?.[key]?.position || Infinity);
+
+        sortingFunctions[`${key}RankDesc`] = (a, b) =>
+          parseFloat(b?.[key]?.position || Infinity) -
+          parseFloat(a?.[key]?.position || Infinity);
+      });
+
+      // Sorting handler
+      const handleSort = () => {
+        const sortFunction = sortingFunctions[sort];
+        if (sortFunction) {
+          setRes([...tempRes].sort(sortFunction));
+        } else {
+          setRes(tempRes);
+        }
+      };
+
+      handleSort();
     }
-  }, [ibo, kaan, maps, sort]);
+  }, [profiles, maps, sort]);
 
   useEffect(() => {
     let tempRes = [...res];
@@ -295,13 +234,22 @@ function App() {
 
   return (
     <div style={{ maxWidth: "100%" }}>
+      {/* Fixed Header */}
       <div
+        ref={topRef} // Reference to the header element
         style={{
+          position: "fixed", // Fix the header to the top
+          top: 0, // Align to the top of the viewport
+          left: 0, // Align to the left
+          right: 0, // Align to the right
+          backgroundColor: "white", // Set background to prevent transparency issues
+          zIndex: 1000, // Ensure it stays above other elements
           display: "flex",
           flexDirection: "row",
           justifyContent: "center",
-          margin: 10,
+          padding: 10, // Add padding for visual spacing
           flexWrap: "wrap", // Allow wrapping on smaller screens
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Add shadow for visual separation
         }}
       >
         <TextField
@@ -352,9 +300,19 @@ function App() {
             );
           })}
         </ButtonGroup>
-        {/* <SortBySelect sort={sort} setSort={setSort} /> */}
       </div>
-      <BasicTable data={row} loading={loading} sort={sort} setSort={setSort} />
+
+      {/* Content below the fixed header */}
+      <div style={{ marginTop: topRef.current?.offsetHeight || 0 }}>
+        {" "}
+        {/* Add top margin equal to the height of the fixed header */}
+        <BasicTable
+          data={row}
+          loading={loading}
+          sort={sort}
+          setSort={setSort}
+        />
+      </div>
     </div>
   );
 }

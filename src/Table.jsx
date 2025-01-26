@@ -13,6 +13,7 @@ import RankProgress from "./RankProgress";
 import TimeProgress from "./TimeProgress";
 
 export default function BasicTable({ data, loading, setSort, sort }) {
+  console.log(data);
   const [openImage, setOpenImage] = React.useState(false);
   const [map, setMap] = React.useState();
 
@@ -219,7 +220,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 </TableCell>
                 <TableCell align="center">
                   <TimeColumn
-                    colTime={row?.ibo?.time}
+                    colTime={row?.ibrahim?.time}
                     otherTime={row?.kaan?.time}
                     wr={row?.map?.wr}
                     otherName={"Kaan"}
@@ -227,7 +228,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 </TableCell>
                 <TableCell align="center">
                   <RankProgress
-                    rank={row?.ibo?.position}
+                    rank={row?.ibrahim?.position}
                     total={row?.map?.finishedCount}
                     rankImage="avatar/ibrahim.jpg"
                     name={"İbrahim"}
@@ -236,7 +237,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 <TableCell align="center">
                   <TimeColumn
                     colTime={row?.kaan?.time}
-                    otherTime={row?.ibo?.time}
+                    otherTime={row?.ibrahim?.time}
                     wr={row?.map?.wr}
                     otherName={"İbrahim"}
                   />
@@ -250,10 +251,10 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                   />
                 </TableCell>
                 <TableCell align="center">
-                  {(row?.ibo?.position || Infinity) ===
+                  {(row?.ibrahim?.position || Infinity) ===
                   (row?.kaan?.position || Infinity) ? (
                     ""
-                  ) : (row?.ibo?.position || Infinity) <
+                  ) : (row?.ibrahim?.position || Infinity) <
                     (row?.kaan?.position || Infinity) ? (
                     <Chip
                       avatar={
