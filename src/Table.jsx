@@ -11,6 +11,7 @@ import { floatToTime } from "./utils";
 import MapModal from "./MapModal";
 import RankProgress from "./RankProgress";
 import TimeProgress from "./TimeProgress";
+import { profileInfo } from "./constants";
 
 export default function BasicTable({ data, loading, setSort, sort }) {
   console.log(data);
@@ -69,102 +70,62 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 ? "▼"
                 : ""}
             </TableCell>
-            <TableCell
-              onClick={() => {
-                if (sort === "ibrahimTimeAsc") {
-                  setSort("ibrahimTimeDesc");
-                } else if (sort === "ibrahimTimeDesc") {
-                  setSort("ibrahimTimeWrDiffAsc");
-                } else if (sort === "ibrahimTimeWrDiffAsc") {
-                  setSort("ibrahimTimeWrDiffDesc");
-                } else if (sort === "ibrahimTimeWrDiffDesc") {
-                  setSort("finishedCount");
-                } else {
-                  setSort("ibrahimTimeAsc");
-                }
-              }}
-              align="center"
-              sx={{ fontWeight: "bold", cursor: "pointer" }}
-            >
-              İbrahim Time{" "}
-              {sort === "ibrahimTimeAsc"
-                ? "▲ (Time Asc)"
-                : sort === "ibrahimTimeDesc"
-                ? "▼ (Time Desc)"
-                : sort === "ibrahimTimeWrDiffAsc"
-                ? "▲ (WR Diff Asc)"
-                : sort === "ibrahimTimeWrDiffDesc"
-                ? "▼ (WR Diff Desc)"
-                : ""}
-            </TableCell>
-            <TableCell
-              onClick={() => {
-                if (sort === "ibrahimRankAsc") {
-                  setSort("ibrahimRankDesc");
-                } else if (sort === "ibrahimRankDesc") {
-                  setSort("finishedCount");
-                } else {
-                  setSort("ibrahimRankAsc");
-                }
-              }}
-              align="center"
-              sx={{ fontWeight: "bold", cursor: "pointer" }}
-            >
-              İbrahim Rank{" "}
-              {sort === "ibrahimRankAsc"
-                ? "▲"
-                : sort === "ibrahimRankDesc"
-                ? "▼"
-                : ""}
-            </TableCell>
-            <TableCell
-              onClick={() => {
-                if (sort === "kaanTimeAsc") {
-                  setSort("kaanTimeDesc");
-                } else if (sort === "kaanTimeDesc") {
-                  setSort("kaanTimeWrDiffAsc");
-                } else if (sort === "kaanTimeWrDiffAsc") {
-                  setSort("kaanTimeWrDiffDesc");
-                } else if (sort === "kaanTimeWrDiffDesc") {
-                  setSort("finishedCount");
-                } else {
-                  setSort("kaanTimeAsc");
-                }
-              }}
-              align="center"
-              sx={{ fontWeight: "bold", cursor: "pointer" }}
-            >
-              Kaan Time{" "}
-              {sort === "kaanTimeAsc"
-                ? "▲ (Time Asc)"
-                : sort === "kaanTimeDesc"
-                ? "▼ (Time Desc)"
-                : sort === "kaanTimeWrDiffAsc"
-                ? "▲ (WR Diff Asc)"
-                : sort === "kaanTimeWrDiffDesc"
-                ? "▼ (WR Diff Desc)"
-                : ""}
-            </TableCell>
-            <TableCell
-              onClick={() => {
-                if (sort === "kaanRankAsc") {
-                  setSort("kaanRankDesc");
-                } else if (sort === "kaanRankDesc") {
-                  setSort("finishedCount");
-                } else {
-                  setSort("kaanRankAsc");
-                }
-              }}
-              align="center"
-              sx={{ fontWeight: "bold", cursor: "pointer" }}
-            >
-              Kaan Rank{" "}
-              {sort === "kaanRankAsc"
-                ? "▲"
-                : sort === "kaanRankDesc"
-                ? "▼"
-                : ""}
-            </TableCell>
+            {Object.keys(profileInfo).map((profile) => (
+              <>
+                <TableCell
+                  key={`${profile}-time`}
+                  onClick={() => {
+                    // Dynamically handle sorting for each profile
+                    if (sort === `${profile}TimeAsc`) {
+                      setSort(`${profile}TimeDesc`);
+                    } else if (sort === `${profile}TimeDesc`) {
+                      setSort(`${profile}TimeWrDiffAsc`);
+                    } else if (sort === `${profile}TimeWrDiffAsc`) {
+                      setSort(`${profile}TimeWrDiffDesc`);
+                    } else if (sort === `${profile}TimeWrDiffDesc`) {
+                      setSort("finishedCount");
+                    } else {
+                      setSort(`${profile}TimeAsc`);
+                    }
+                  }}
+                  align="center"
+                  sx={{ fontWeight: "bold", cursor: "pointer" }}
+                >
+                  {`${profile.charAt(0).toUpperCase() + profile.slice(1)} Time`}{" "}
+                  {sort === `${profile}TimeAsc`
+                    ? "▲ (Time Asc)"
+                    : sort === `${profile}TimeDesc`
+                    ? "▼ (Time Desc)"
+                    : sort === `${profile}TimeWrDiffAsc`
+                    ? "▲ (WR Diff Asc)"
+                    : sort === `${profile}TimeWrDiffDesc`
+                    ? "▼ (WR Diff Desc)"
+                    : ""}
+                </TableCell>
+                <TableCell
+                  key={`${profile}-rank`}
+                  onClick={() => {
+                    // Dynamically handle ranking sort for each profile
+                    if (sort === `${profile}RankAsc`) {
+                      setSort(`${profile}RankDesc`);
+                    } else if (sort === `${profile}RankDesc`) {
+                      setSort("finishedCount");
+                    } else {
+                      setSort(`${profile}RankAsc`);
+                    }
+                  }}
+                  align="center"
+                  sx={{ fontWeight: "bold", cursor: "pointer" }}
+                >
+                  {`${profile.charAt(0).toUpperCase() + profile.slice(1)} Rank`}{" "}
+                  {sort === `${profile}RankAsc`
+                    ? "▲"
+                    : sort === `${profile}RankDesc`
+                    ? "▼"
+                    : ""}
+                </TableCell>
+              </>
+            ))}
             <TableCell align="center" sx={{ fontWeight: "bold" }}>
               Who is better?
             </TableCell>
@@ -218,38 +179,30 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 <TableCell component="th" scope="row" align="center">
                   <b>{floatToTime(row?.map?.wr)} </b>
                 </TableCell>
-                <TableCell align="center">
-                  <TimeColumn
-                    colTime={row?.ibrahim?.time}
-                    otherTime={row?.kaan?.time}
-                    wr={row?.map?.wr}
-                    otherName={"Kaan"}
-                  />
-                </TableCell>
-                <TableCell align="center">
-                  <RankProgress
-                    rank={row?.ibrahim?.position}
-                    total={row?.map?.finishedCount}
-                    rankImage="avatar/ibrahim.jpg"
-                    name={"İbrahim"}
-                  />
-                </TableCell>
-                <TableCell align="center">
-                  <TimeColumn
-                    colTime={row?.kaan?.time}
-                    otherTime={row?.ibrahim?.time}
-                    wr={row?.map?.wr}
-                    otherName={"İbrahim"}
-                  />
-                </TableCell>
-                <TableCell align="center">
-                  <RankProgress
-                    rank={row?.kaan?.position}
-                    total={row?.map?.finishedCount}
-                    rankImage="avatar/kaan.jpg"
-                    name={"Kaan"}
-                  />
-                </TableCell>
+                {Object.keys(profileInfo).map((profile) => (
+                  <>
+                    <TableCell align="center">
+                      <TimeColumn
+                        colTime={row?.[profile]?.time}
+                        otherTime={
+                          row?.[profile === "kaan" ? "ibrahim" : "kaan"]?.time
+                        }
+                        wr={row?.map?.wr}
+                        otherName={profile === "kaan" ? "İbrahim" : "Kaan"}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <RankProgress
+                        rank={row?.[profile]?.position}
+                        total={row?.map?.finishedCount}
+                        rankImage={`avatar/${profile}.jpg`}
+                        name={
+                          profile.charAt(0).toUpperCase() + profile.slice(1)
+                        }
+                      />
+                    </TableCell>
+                  </>
+                ))}
                 <TableCell align="center">
                   {(row?.ibrahim?.position || Infinity) ===
                   (row?.kaan?.position || Infinity) ? (
