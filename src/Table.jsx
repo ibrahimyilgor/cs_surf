@@ -6,15 +6,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Avatar, Chip, CircularProgress } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { floatToTime } from "./utils";
 import MapModal from "./MapModal";
 import RankProgress from "./RankProgress";
 import TimeProgress from "./TimeProgress";
-import { profileInfo } from "./constants";
+import RankWinnerCell from "./RankWinnerCell";
+import { useAppContext } from "./AppContext";
 
 export default function BasicTable({ data, loading, setSort, sort }) {
-  console.log(data);
+  const { selectedProfiles } = useAppContext();
+
   const [openImage, setOpenImage] = React.useState(false);
   const [map, setMap] = React.useState();
 
@@ -70,7 +72,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 ? "▼"
                 : ""}
             </TableCell>
-            {Object.keys(profileInfo).map((profile) => (
+            {Object.keys(selectedProfiles).map((profile) => (
               <>
                 <TableCell
                   key={`${profile}-time`}
@@ -89,7 +91,12 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                     }
                   }}
                   align="center"
-                  sx={{ fontWeight: "bold", cursor: "pointer" }}
+                  sx={{
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    minWidth: 300,
+                    minHeight: 200,
+                  }}
                 >
                   {`${profile.charAt(0).toUpperCase() + profile.slice(1)} Time`}{" "}
                   {sort === `${profile}TimeAsc`
@@ -115,7 +122,12 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                     }
                   }}
                   align="center"
-                  sx={{ fontWeight: "bold", cursor: "pointer" }}
+                  sx={{
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    minWidth: 250,
+                    minHeigth: 200,
+                  }}
                 >
                   {`${profile.charAt(0).toUpperCase() + profile.slice(1)} Rank`}{" "}
                   {sort === `${profile}RankAsc`
@@ -179,58 +191,36 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 <TableCell component="th" scope="row" align="center">
                   <b>{floatToTime(row?.map?.wr)} </b>
                 </TableCell>
-                {Object.keys(profileInfo).map((profile) => (
+                {Object.keys(selectedProfiles).map((profile) => (
                   <>
                     <TableCell align="center">
                       <TimeColumn
                         colTime={row?.[profile]?.time}
-                        otherTime={
-                          row?.[profile === "kaan" ? "ibrahim" : "kaan"]?.time
-                        }
+                        name={profile}
+                        otherTime={Object.entries(row)
+                          .filter(([key]) => key !== profile && key !== "map")
+                          .map(([key2, value]) => {
+                            return { key: key2, time: value?.time };
+                          })}
                         wr={row?.map?.wr}
-                        otherName={profile === "kaan" ? "İbrahim" : "Kaan"}
                       />
                     </TableCell>
                     <TableCell align="center">
                       <RankProgress
                         rank={row?.[profile]?.position}
                         total={row?.map?.finishedCount}
-                        rankImage={`avatar/${profile}.jpg`}
-                        name={
-                          profile.charAt(0).toUpperCase() + profile.slice(1)
-                        }
+                        name={profile}
+                        otherRanks={Object.entries(row)
+                          .filter(([key]) => key !== profile && key !== "map")
+                          .map(([key2, value]) => {
+                            return { key: key2, position: value?.position };
+                          })}
                       />
                     </TableCell>
                   </>
                 ))}
                 <TableCell align="center">
-                  {(row?.ibrahim?.position || Infinity) ===
-                  (row?.kaan?.position || Infinity) ? (
-                    ""
-                  ) : (row?.ibrahim?.position || Infinity) <
-                    (row?.kaan?.position || Infinity) ? (
-                    <Chip
-                      avatar={
-                        <Avatar alt="İbrahim" src="/avatar/ibrahim.jpg" />
-                      }
-                      label="İbrahim"
-                      sx={{
-                        backgroundColor: "#155E95",
-                        color: "white",
-                        fontWeight: "bold",
-                      }}
-                    />
-                  ) : (
-                    <Chip
-                      avatar={<Avatar alt="İbrahim" src="/avatar/kaan.jpg" />}
-                      label="Kaan"
-                      sx={{
-                        backgroundColor: "#EB5A3C",
-                        color: "white",
-                        fontWeight: "bold",
-                      }}
-                    />
-                  )}
+                  <RankWinnerCell row={row} />
                 </TableCell>
               </TableRow>
             ))}
@@ -242,7 +232,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
   );
 }
 
-const TimeColumn = ({ colTime, otherTime, wr, rankImage, otherName }) => {
+const TimeColumn = ({ colTime, name, otherTime, wr }) => {
   return (
     <div
       style={{
@@ -258,9 +248,8 @@ const TimeColumn = ({ colTime, otherTime, wr, rankImage, otherName }) => {
         <TimeProgress
           colTime={colTime}
           otherTime={otherTime}
-          rankImage={rankImage}
+          name={name}
           wr={wr}
-          otherName={otherName}
         />
       </div>
     </div>

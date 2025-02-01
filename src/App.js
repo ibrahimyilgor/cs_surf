@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import BasicTable from "./Table";
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
+import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { TextField } from "@mui/material";
-import { profileInfo } from "./constants";
-// import SortBySelect from "./Sort";
+import NameFilter from "./NameFilter";
+import { useAppContext } from "./AppContext";
 
 function App() {
+  const { selectedProfiles } = useAppContext();
   const [profiles, setProfiles] = useState({});
 
   const [maps, setMaps] = useState([]);
@@ -24,7 +24,9 @@ function App() {
   const topRef = useRef(null);
 
   const buttonMap = useMemo(() => {
-    return [
+    const profileKeys = Object.keys(selectedProfiles);
+
+    let buttons = [
       {
         id: 0,
         name: "ALL",
@@ -34,54 +36,84 @@ function App() {
       },
       {
         id: 1,
-        name: "KAAN IS BETTER",
+        name: "ALL FINISHED",
         onClick: (res) => {
-          return res.filter(
-            (item) =>
-              item?.kaan?.position < (item?.ibrahim?.position ?? Infinity)
-          );
+          return res.filter((item) => {
+            // Check if all profiles have valid data (e.g., position or time)
+            return Object.keys(selectedProfiles).every(
+              (profile) => item[profile]?.position || item[profile]?.time
+            );
+          });
         },
       },
       {
         id: 2,
-        name: "IBRAHIM IS BETTER",
-        onClick: (res) => {
-          return res.filter(
-            (item) =>
-              item?.ibrahim?.position < (item?.kaan?.position ?? Infinity)
-          );
-        },
-      },
-      {
-        id: 3,
-        name: "BOTH FINISHED",
-        onClick: (res) => {
-          return res.filter((item) => item?.ibrahim && item.kaan);
-        },
-      },
-      {
-        id: 4,
-        name: "ONLY KAAN FINISHED",
-        onClick: (res) => {
-          return res.filter((item) => item.kaan && !item?.ibrahim);
-        },
-      },
-      {
-        id: 5,
-        name: "ONLY IBRAHIM FINISHED",
-        onClick: (res) => {
-          return res.filter((item) => item?.ibrahim && !item.kaan);
-        },
-      },
-      {
-        id: 6,
         name: "NOONE FINISHED",
         onClick: (res) => {
-          return res.filter((item) => !item?.ibrahim && !item.kaan);
+          return res.filter((item) => {
+            // Check if none of the profiles have valid data (e.g., position or time)
+            return Object.keys(selectedProfiles).every(
+              (profile) => !item[profile]?.position && !item[profile]?.time
+            );
+          });
         },
       },
     ];
-  }, []);
+
+    // Generate dynamic buttons for each profile
+    profileKeys.forEach((key, index) => {
+      const baseId = index * 3 + 3; // Start from ID 3 for dynamic buttons to avoid overlap
+
+      buttons.push({
+        id: baseId,
+        name: `ONLY ${key.toUpperCase()} FINISHED`,
+        onClick: (res) => {
+          return res.filter((item) => {
+            // Check if only the specified profile has valid data (position or time)
+            return (
+              (item[key]?.position || item[key]?.time) && // The specified profile has data
+              Object.keys(selectedProfiles).every(
+                (profile) =>
+                  profile === key || // Keep the specified profile
+                  !(item[profile]?.position || item[profile]?.time) // Others should not have valid data
+              )
+            );
+          });
+        },
+      });
+
+      buttons.push({
+        id: baseId + 1,
+        name: `${key.toUpperCase()} FINISHED`,
+        onClick: (res) => {
+          return res.filter((item) => {
+            // Check if only the specified profile has valid data (position or time)
+            return (
+              item[key]?.position || item[key]?.time // The specified profile has data
+            );
+          });
+        },
+      });
+
+      buttons.push({
+        id: baseId + 2, // Increment ID for each button to avoid duplicates
+        name: `${key.toUpperCase()} IS BETTER`,
+        onClick: (res) => {
+          return res.filter((item) => {
+            // Compare the position of the specified profile against all other profiles
+            return Object.keys(selectedProfiles).every((profile) => {
+              // Compare the current profile's position with others, ensuring the specified profile's position is always better
+              return (
+                item[key]?.position <= (item[profile]?.position ?? Infinity) // Ensure specified profile's position is better
+              );
+            });
+          });
+        },
+      });
+    });
+
+    return buttons;
+  }, [selectedProfiles]);
 
   useEffect(() => {
     const fetchMaps = async () => {
@@ -119,7 +151,7 @@ function App() {
 
     const fetchProfiles = async () => {
       try {
-        const profilePromises = Object.entries(profileInfo).map(
+        const profilePromises = Object.entries(selectedProfiles).map(
           async ([name, info]) => {
             const response = await fetch(
               `https://surf.xplay.gg/api/leaderboard/profile?accountId=${info?.id}`
@@ -150,7 +182,7 @@ function App() {
     };
 
     fetchData();
-  }, []);
+  }, [selectedProfiles]);
 
   useEffect(() => {
     if (profiles && maps) {
@@ -177,7 +209,7 @@ function App() {
       };
 
       // Dynamically add sorting logic for each ID in IDS
-      Object.keys(profileInfo).forEach((key) => {
+      Object.keys(selectedProfiles).forEach((key) => {
         sortingFunctions[`${key}TimeAsc`] = (a, b) =>
           parseFloat(a?.[key]?.time || Infinity) -
           parseFloat(b?.[key]?.time || Infinity);
@@ -215,7 +247,7 @@ function App() {
 
       handleSort();
     }
-  }, [profiles, maps, sort]);
+  }, [profiles, maps, sort, selectedProfiles]);
 
   useEffect(() => {
     let tempRes = [...res];
@@ -258,48 +290,41 @@ function App() {
           variant="outlined"
           color="#212121"
           value={search}
-          sx={{ marginRight: 1, width: { xs: "100%", sm: "auto" } }} // 100% width on mobile, auto on larger screens
+          sx={{
+            marginRight: { xs: 0, sm: 1 },
+            width: { xs: "100%", sm: "auto" },
+          }} // 100% width on mobile, auto on larger screens
           onChange={(e) => setSearch(e.target.value)}
         />
-        <ButtonGroup
-          variant="outlined"
-          aria-label="Basic button group"
+        <FormControl
           sx={{
-            borderRadius: 2,
-            ".MuiButtonGroup-grouped": {
-              borderColor: "#212121",
-            },
-            display: "flex",
-            flexWrap: "wrap", // Allow button wrapping on small screens
+            width: { xs: "100%", sm: "250px" },
+            marginTop: { xs: 1, sm: 0 },
             justifyContent: "center",
-            marginTop: { xs: 1, sm: 0 }, // Add space on small screens
-            width: { xs: "100%", sm: "auto" }, // Button group takes full width on mobile
           }}
         >
-          {buttonMap.map((button) => {
-            return (
-              <Button
-                key={button.id} // Add a key prop
-                onClick={() => {
-                  setSelected(button.id);
-                }}
-                sx={{
-                  backgroundColor:
-                    selected === button.id ? "#212121" : "transparent",
-                  color: selected === button.id ? "white" : "inherit",
-                  "&:hover": {
-                    backgroundColor:
-                      selected === button.id ? "#212121" : "lightgray",
-                  },
-                  width: { xs: "100%", sm: "auto" }, // Buttons take full width on mobile
-                  marginBottom: 0, // Add some margin at the bottom
-                }}
-              >
+          <InputLabel id="button-group-label">Filter</InputLabel>
+          <Select
+            labelId="button-group-label"
+            id="button-group"
+            value={selected}
+            onChange={(event) => setSelected(event.target.value)}
+            label="Select Option"
+            sx={{
+              borderRadius: 2,
+              ".MuiSelect-outlined": {
+                borderColor: "#212121",
+              },
+            }}
+          >
+            {buttonMap.map((button) => (
+              <MenuItem key={button.id} value={button.id}>
                 {button.name}
-              </Button>
-            );
-          })}
-        </ButtonGroup>
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <NameFilter />
       </div>
 
       {/* Content below the fixed header */}

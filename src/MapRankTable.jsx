@@ -8,7 +8,7 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { floatToTime } from "./utils";
-import { profileInfo } from "./constants";
+import { useAppContext } from "./AppContext";
 
 const columns = [
   {
@@ -35,6 +35,7 @@ const columns = [
 ];
 
 export default function MapRankTable({ name, count }) {
+  const { selectedProfiles } = useAppContext();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [rows, setRows] = React.useState([]);
@@ -103,20 +104,20 @@ export default function MapRankTable({ name, count }) {
                 role="checkbox"
                 tabIndex={-1}
                 sx={{
-                  borderWidth: Object.values(profileInfo)
+                  borderWidth: Object.values(selectedProfiles)
                     .map((profile) => profile.id)
                     .includes(row?.accountID.toString())
                     ? 3
                     : 0,
-                  borderStyle: Object.values(profileInfo)
+                  borderStyle: Object.values(selectedProfiles)
                     .map((profile) => profile.id)
                     .includes(row?.accountID.toString())
                     ? "solid"
                     : "none",
-                  borderColor: Object.values(profileInfo)
+                  borderColor: Object.values(selectedProfiles)
                     .map((profile) => profile.id)
                     .includes(row?.accountID.toString())
-                    ? Object.values(profileInfo).find(
+                    ? Object.values(selectedProfiles).find(
                         (profile) => profile.id === row.accountID.toString()
                       )?.color
                     : "none",

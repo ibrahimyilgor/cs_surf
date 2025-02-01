@@ -1,7 +1,20 @@
 import { Box, LinearProgress, Typography } from "@mui/material";
+import { useAppContext } from "./AppContext";
 
-const RankProgress = ({ rank, total, rankImage, name }) => {
+const RankProgress = ({ rank, total, name, otherRanks = [] }) => {
+  const { selectedProfiles } = useAppContext();
+
   const progressValue = rank ? ((total - rank) * 100) / total : 0;
+
+  const otherProgressValues = otherRanks.map((profile) => ({
+    name:
+      profile.key.substring(0, 1).toUpperCase() +
+      profile.key.substring(1).toLowerCase(),
+    value: ((total - profile.position) * 100) / total,
+    position: profile.position,
+  }));
+
+  if (!rank) return null;
 
   return (
     <Box sx={{ position: "relative", width: "100%" }}>
@@ -14,7 +27,7 @@ const RankProgress = ({ rank, total, rankImage, name }) => {
           borderRadius: 5,
           backgroundColor: "lightgray",
           "& .MuiLinearProgress-bar": {
-            backgroundColor: name === "Kaan" ? "#EB5A3C" : "#155E95",
+            backgroundColor: selectedProfiles[name]?.color || "black",
           },
         }}
       />
@@ -23,7 +36,7 @@ const RankProgress = ({ rank, total, rankImage, name }) => {
       <Box
         sx={{
           position: "absolute",
-          top: -25, // Adjust to position images above the bar
+          top: -25,
           width: "100%",
         }}
       >
@@ -37,17 +50,38 @@ const RankProgress = ({ rank, total, rankImage, name }) => {
           }}
         >
           <img
-            src={rankImage}
-            alt="Your Rank"
+            src={`avatar/${name}.jpg`}
+            alt={name}
             style={{ width: 20, height: 20, borderRadius: "50%" }}
           />
         </Box>
 
-        {/* Best */}
+        {/* Other Players' Ranks */}
+        {otherProgressValues
+          .filter((prof) => prof.position > 0)
+          .map((profile, index) => (
+            <Box
+              key={index}
+              sx={{
+                position: "absolute",
+                left: `${profile.value}%`,
+                transform: "translateX(-50%)",
+                textAlign: "center",
+              }}
+            >
+              <img
+                src={`avatar/${profile.name}.jpg`}
+                alt={profile.name}
+                style={{ width: 20, height: 20, borderRadius: "50%" }}
+              />
+            </Box>
+          ))}
+
+        {/* Best (First Place) */}
         <Box
           sx={{
             position: "absolute",
-            right: -10,
+            left: "97%",
             textAlign: "center",
           }}
         >
@@ -59,14 +93,49 @@ const RankProgress = ({ rank, total, rankImage, name }) => {
         </Box>
       </Box>
 
-      {/* Descriptive Text */}
+      {/* Rank Description */}
       <Typography
         variant="body2"
         align="center"
-        sx={{ marginTop: 2, fontWeight: "bold" }}
+        sx={{ marginTop: 1.5, fontWeight: "bold" }}
       >
         {rank} / {total} ({((rank / total || 0) * 100).toFixed(2)}%)
       </Typography>
+
+      {/* Rank Differences */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "center",
+          // marginTop: 1,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            marginLeft: 5,
+            alignItems: "start",
+          }}
+        >
+          {/* Other Ranks Differences */}
+          {otherProgressValues
+            .filter((prof) => prof.position > 0)
+            .map((profile, index) => {
+              const rankDiff = rank - profile.position;
+              return (
+                <b
+                  key={index}
+                  style={{ color: rankDiff > 0 ? "green" : "red" }}
+                >
+                  {rankDiff > 0 ? "-" : "+"}
+                  {Math.abs(rankDiff)} ({profile.name})
+                </b>
+              );
+            })}
+        </Box>
+      </Box>
     </Box>
   );
 };
