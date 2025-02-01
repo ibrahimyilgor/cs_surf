@@ -97,7 +97,17 @@ function App() {
         });
 
         buttons.push({
-          id: baseId + 2, // Increment ID for each button to avoid duplicates
+          id: baseId + 2,
+          name: `${key.toUpperCase()} UNFINISHED`,
+          onClick: (res) => {
+            return res.filter((item) => {
+              return !item[key]?.position && !item[key]?.time;
+            });
+          },
+        });
+
+        buttons.push({
+          id: baseId + 3, // Increment ID for each button to avoid duplicates
           name: `${key.toUpperCase()} IS BETTER`,
           onClick: (res) => {
             return res.filter((item) => {
@@ -154,6 +164,16 @@ function App() {
       }
     };
 
+    const fetchData = async () => {
+      setLoading(true); // Start loading
+      await Promise.all([fetchMaps()]);
+      setLoading(false); // Stop loading
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
     const fetchProfiles = async () => {
       try {
         const profilePromises = Object.entries(selectedProfiles).map(
@@ -182,7 +202,7 @@ function App() {
 
     const fetchData = async () => {
       setLoading(true); // Start loading
-      await Promise.all([fetchMaps(), fetchProfiles()]);
+      await Promise.all([fetchProfiles()]);
       setLoading(false); // Stop loading
     };
 
