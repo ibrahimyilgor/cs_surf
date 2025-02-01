@@ -5,6 +5,7 @@ import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { TextField } from "@mui/material";
 import NameFilter from "./NameFilter";
 import { useAppContext } from "./AppContext";
+import { profileInfo } from "./constants";
 
 function App() {
   const { selectedProfiles } = useAppContext();
@@ -61,58 +62,63 @@ function App() {
     ];
 
     // Generate dynamic buttons for each profile
-    profileKeys.forEach((key, index) => {
-      const baseId = index * 3 + 3; // Start from ID 3 for dynamic buttons to avoid overlap
+    profileKeys &&
+      profileKeys.forEach((key, index) => {
+        const baseId = index * 3 + 3; // Start from ID 3 for dynamic buttons to avoid overlap
 
-      buttons.push({
-        id: baseId,
-        name: `ONLY ${key.toUpperCase()} FINISHED`,
-        onClick: (res) => {
-          return res.filter((item) => {
-            // Check if only the specified profile has valid data (position or time)
-            return (
-              (item[key]?.position || item[key]?.time) && // The specified profile has data
-              Object.keys(selectedProfiles).every(
-                (profile) =>
-                  profile === key || // Keep the specified profile
-                  !(item[profile]?.position || item[profile]?.time) // Others should not have valid data
-              )
-            );
-          });
-        },
-      });
-
-      buttons.push({
-        id: baseId + 1,
-        name: `${key.toUpperCase()} FINISHED`,
-        onClick: (res) => {
-          return res.filter((item) => {
-            // Check if only the specified profile has valid data (position or time)
-            return (
-              item[key]?.position || item[key]?.time // The specified profile has data
-            );
-          });
-        },
-      });
-
-      buttons.push({
-        id: baseId + 2, // Increment ID for each button to avoid duplicates
-        name: `${key.toUpperCase()} IS BETTER`,
-        onClick: (res) => {
-          return res.filter((item) => {
-            // Compare the position of the specified profile against all other profiles
-            return Object.keys(selectedProfiles).every((profile) => {
-              // Compare the current profile's position with others, ensuring the specified profile's position is always better
+        buttons.push({
+          id: baseId,
+          name: `ONLY ${key.toUpperCase()} FINISHED`,
+          onClick: (res) => {
+            return res.filter((item) => {
+              // Check if only the specified profile has valid data (position or time)
               return (
-                item[key]?.position <= (item[profile]?.position ?? Infinity) // Ensure specified profile's position is better
+                (item[key]?.position || item[key]?.time) && // The specified profile has data
+                Object.keys(selectedProfiles).every(
+                  (profile) =>
+                    profile === key || // Keep the specified profile
+                    !(item[profile]?.position || item[profile]?.time) // Others should not have valid data
+                )
               );
             });
-          });
-        },
+          },
+        });
+
+        buttons.push({
+          id: baseId + 1,
+          name: `${key.toUpperCase()} FINISHED`,
+          onClick: (res) => {
+            return res.filter((item) => {
+              // Check if only the specified profile has valid data (position or time)
+              return (
+                item[key]?.position || item[key]?.time // The specified profile has data
+              );
+            });
+          },
+        });
+
+        buttons.push({
+          id: baseId + 2, // Increment ID for each button to avoid duplicates
+          name: `${key.toUpperCase()} IS BETTER`,
+          onClick: (res) => {
+            return res.filter((item) => {
+              // Compare the position of the specified profile against all other profiles
+              return Object.keys(selectedProfiles).every((profile) => {
+                // Compare the current profile's position with others, ensuring the specified profile's position is always better
+                return (
+                  item[key]?.position <= (item[profile]?.position ?? Infinity) // Ensure specified profile's position is better
+                );
+              });
+            });
+          },
+        });
       });
-    });
 
     return buttons;
+  }, [selectedProfiles]);
+
+  useEffect(() => {
+    setSelected(0);
   }, [selectedProfiles]);
 
   useEffect(() => {
@@ -258,8 +264,8 @@ function App() {
     }
     if (selected >= 0) {
       tempRes = buttonMap
-        .find((button) => button.id === selected)
-        .onClick(tempRes);
+        ?.find?.((button) => button.id === selected)
+        ?.onClick(tempRes);
     }
     setRow(tempRes);
   }, [selected, search, buttonMap, res]);

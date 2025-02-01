@@ -151,79 +151,80 @@ export default function BasicTable({ data, loading, setSort, sort }) {
           </TableRow>
         ) : (
           <TableBody>
-            {data.map((row, index) => (
-              <TableRow
-                key={row?.map?.name || ""}
-                sx={{
-                  "&:last-child td, &:last-child th": { border: 0 },
-                  backgroundColor: index % 2 === 0 ? "#f5f5f5" : "#ffffff", // Alternate row colors
-                }}
-              >
-                <TableCell component="th" scope="row" align="center">
-                  <b>{index + 1} </b>
-                </TableCell>
-                <TableCell component="th" scope="row" align="center">
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <img
-                      src={`https://cdn.xplay.cloud/img/site/common/maps/${row?.map?.name}.jpg`}
-                      height="60"
-                      width="60"
-                      alt={row?.map?.name}
+            {data &&
+              data.map((row, index) => (
+                <TableRow
+                  key={row?.map?.name || ""}
+                  sx={{
+                    "&:last-child td, &:last-child th": { border: 0 },
+                    backgroundColor: index % 2 === 0 ? "#f5f5f5" : "#ffffff",
+                  }}
+                >
+                  <TableCell component="th" scope="row" align="center">
+                    <b>{index + 1} </b>
+                  </TableCell>
+                  <TableCell component="th" scope="row" align="center">
+                    <div
                       style={{
-                        marginBottom: "8px",
-                        cursor: "pointer",
-                        borderRadius: 10,
-                        borderWidth: 1,
-                        borderStyle: "solid",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
                       }}
-                      onClick={() => handleOpen(row?.map)}
-                    />
-                    <b>{row?.map?.name}</b>
-                  </div>
-                </TableCell>
+                    >
+                      <img
+                        src={`https://cdn.xplay.cloud/img/site/common/maps/${row?.map?.name}.jpg`}
+                        height="60"
+                        width="60"
+                        alt={row?.map?.name}
+                        style={{
+                          marginBottom: "8px",
+                          cursor: "pointer",
+                          borderRadius: 10,
+                          borderWidth: 1,
+                          borderStyle: "solid",
+                        }}
+                        onClick={() => handleOpen(row?.map)}
+                      />
+                      <b>{row?.map?.name}</b>
+                    </div>
+                  </TableCell>
 
-                <TableCell component="th" scope="row" align="center">
-                  <b>{floatToTime(row?.map?.wr)} </b>
-                </TableCell>
-                {Object.keys(selectedProfiles).map((profile) => (
-                  <>
-                    <TableCell align="center">
-                      <TimeColumn
-                        colTime={row?.[profile]?.time}
-                        name={profile}
-                        otherTime={Object.entries(row)
-                          .filter(([key]) => key !== profile && key !== "map")
-                          .map(([key2, value]) => {
-                            return { key: key2, time: value?.time };
-                          })}
-                        wr={row?.map?.wr}
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <RankProgress
-                        rank={row?.[profile]?.position}
-                        total={row?.map?.finishedCount}
-                        name={profile}
-                        otherRanks={Object.entries(row)
-                          .filter(([key]) => key !== profile && key !== "map")
-                          .map(([key2, value]) => {
-                            return { key: key2, position: value?.position };
-                          })}
-                      />
-                    </TableCell>
-                  </>
-                ))}
-                <TableCell align="center">
-                  <RankWinnerCell row={row} />
-                </TableCell>
-              </TableRow>
-            ))}
+                  <TableCell component="th" scope="row" align="center">
+                    <b>{floatToTime(row?.map?.wr)} </b>
+                  </TableCell>
+                  {Object.keys(selectedProfiles).map((profile) => (
+                    <>
+                      <TableCell align="center" sx={{ height: 150 }}>
+                        <TimeColumn
+                          colTime={row?.[profile]?.time}
+                          name={profile}
+                          otherTime={Object.entries(row)
+                            .filter(([key]) => key !== profile && key !== "map")
+                            .map(([key2, value]) => {
+                              return { key: key2, time: value?.time };
+                            })}
+                          wr={row?.map?.wr}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <RankProgress
+                          rank={row?.[profile]?.position}
+                          total={row?.map?.finishedCount}
+                          name={profile}
+                          otherRanks={Object.entries(row)
+                            .filter(([key]) => key !== profile && key !== "map")
+                            .map(([key2, value]) => {
+                              return { key: key2, position: value?.position };
+                            })}
+                        />
+                      </TableCell>
+                    </>
+                  ))}
+                  <TableCell align="center">
+                    <RankWinnerCell row={row} />
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         )}
       </Table>
