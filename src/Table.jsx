@@ -72,10 +72,10 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 ? "▼"
                 : ""}
             </TableCell>
-            {Object.keys(selectedProfiles).map((profile) => (
-              <>
+            {Object.keys(selectedProfiles).map((profile, index) => (
+              <React.Fragment key={profile + "" + index}>
                 <TableCell
-                  key={`${profile}-time`}
+                  key={`${profile}-time-${index}`}
                   onClick={() => {
                     // Dynamically handle sorting for each profile
                     if (sort === `${profile}TimeAsc`) {
@@ -110,7 +110,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                     : ""}
                 </TableCell>
                 <TableCell
-                  key={`${profile}-rank`}
+                  key={`${profile}-rank-${index}`}
                   onClick={() => {
                     // Dynamically handle ranking sort for each profile
                     if (sort === `${profile}RankAsc`) {
@@ -126,7 +126,7 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                     fontWeight: "bold",
                     cursor: "pointer",
                     minWidth: 250,
-                    minHeigth: 200,
+                    minHeight: 200,
                   }}
                 >
                   {`${profile.charAt(0).toUpperCase() + profile.slice(1)} Rank`}{" "}
@@ -136,97 +136,98 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                     ? "▼"
                     : ""}
                 </TableCell>
-              </>
+              </React.Fragment>
             ))}
             <TableCell align="center" sx={{ fontWeight: "bold" }}>
               Who is better?
             </TableCell>
           </TableRow>
         </TableHead>
-        {loading ? (
-          <TableRow>
-            <TableCell colSpan={8} align="center" sx={{ height: "100%" }}>
-              <CircularProgress />
-            </TableCell>
-          </TableRow>
-        ) : (
-          <TableBody>
-            {data &&
-              data.map((row, index) => (
-                <TableRow
-                  key={row?.map?.name || ""}
-                  sx={{
-                    "&:last-child td, &:last-child th": { border: 0 },
-                    backgroundColor: index % 2 === 0 ? "#f5f5f5" : "#ffffff",
-                  }}
-                >
-                  <TableCell component="th" scope="row" align="center">
-                    <b>{index + 1} </b>
-                  </TableCell>
-                  <TableCell component="th" scope="row" align="center">
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                      }}
-                    >
-                      <img
-                        src={`https://cdn.xplay.cloud/img/site/common/maps/${row?.map?.name}.jpg`}
-                        height="60"
-                        width="60"
-                        alt={row?.map?.name}
-                        style={{
-                          marginBottom: "8px",
-                          cursor: "pointer",
-                          borderRadius: 10,
-                          borderWidth: 1,
-                          borderStyle: "solid",
-                        }}
-                        onClick={() => handleOpen(row?.map)}
-                      />
-                      <b>{row?.map?.name}</b>
-                    </div>
-                  </TableCell>
 
-                  <TableCell component="th" scope="row" align="center">
-                    <b>{floatToTime(row?.map?.wr)} </b>
-                  </TableCell>
-                  {Object.keys(selectedProfiles).map((profile) => (
-                    <>
-                      <TableCell align="center" sx={{ height: 150 }}>
-                        <TimeColumn
-                          colTime={row?.[profile]?.time}
-                          name={profile}
-                          otherTime={Object.entries(row)
-                            .filter(([key]) => key !== profile && key !== "map")
-                            .map(([key2, value]) => {
-                              return { key: key2, time: value?.time };
-                            })}
-                          wr={row?.map?.wr}
-                        />
-                      </TableCell>
-                      <TableCell align="center">
-                        <RankProgress
-                          rank={row?.[profile]?.position}
-                          total={row?.map?.finishedCount}
-                          name={profile}
-                          otherRanks={Object.entries(row)
-                            .filter(([key]) => key !== profile && key !== "map")
-                            .map(([key2, value]) => {
-                              return { key: key2, position: value?.position };
-                            })}
-                        />
-                      </TableCell>
-                    </>
-                  ))}
-                  <TableCell align="center">
-                    <RankWinnerCell row={row} />
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        )}
+        {/* Move the loading spinner into TableBody */}
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={8} align="center" sx={{ height: "100%" }}>
+                <CircularProgress />
+              </TableCell>
+            </TableRow>
+          ) : (
+            data?.map((row, index) => (
+              <TableRow
+                key={row?.map?.name || ""}
+                sx={{
+                  "&:last-child td, &:last-child th": { border: 0 },
+                  backgroundColor: index % 2 === 0 ? "#f5f5f5" : "#ffffff",
+                }}
+              >
+                <TableCell component="th" scope="row" align="center">
+                  <b>{index + 1} </b>
+                </TableCell>
+                <TableCell component="th" scope="row" align="center">
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    <img
+                      src={`https://cdn.xplay.cloud/img/site/common/maps/${row?.map?.name}.jpg`}
+                      height="60"
+                      width="60"
+                      alt={row?.map?.name}
+                      style={{
+                        marginBottom: "8px",
+                        cursor: "pointer",
+                        borderRadius: 10,
+                        borderWidth: 1,
+                        borderStyle: "solid",
+                      }}
+                      onClick={() => handleOpen(row?.map)}
+                    />
+                    <b>{row?.map?.name}</b>
+                  </div>
+                </TableCell>
+
+                <TableCell component="th" scope="row" align="center">
+                  <b>{floatToTime(row?.map?.wr)} </b>
+                </TableCell>
+                {Object.keys(selectedProfiles).map((profile, index) => (
+                  <React.Fragment key={profile + index}>
+                    <TableCell align="center" sx={{ height: 150 }}>
+                      <TimeColumn
+                        colTime={row?.[profile]?.time}
+                        name={profile}
+                        otherTime={Object.entries(row)
+                          .filter(([key]) => key !== profile && key !== "map")
+                          .map(([key2, value]) => {
+                            return { key: key2, time: value?.time };
+                          })}
+                        wr={row?.map?.wr}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <RankProgress
+                        rank={row?.[profile]?.position}
+                        total={row?.map?.finishedCount}
+                        name={profile}
+                        otherRanks={Object.entries(row)
+                          .filter(([key]) => key !== profile && key !== "map")
+                          .map(([key2, value]) => {
+                            return { key: key2, position: value?.position };
+                          })}
+                      />
+                    </TableCell>
+                  </React.Fragment>
+                ))}
+                <TableCell align="center">
+                  <RankWinnerCell row={row} />
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
       </Table>
       <MapModal open={openImage} handleClose={handleClose} map={map} />
     </TableContainer>

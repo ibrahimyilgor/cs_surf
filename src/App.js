@@ -5,7 +5,6 @@ import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { TextField } from "@mui/material";
 import NameFilter from "./NameFilter";
 import { useAppContext } from "./AppContext";
-import { profileInfo } from "./constants";
 
 function App() {
   const { selectedProfiles } = useAppContext();
