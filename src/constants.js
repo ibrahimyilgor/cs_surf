@@ -7,4 +7,5 @@ export const profileInfo = {
   ibrahim: { id: "376043163", color: "#155E95", status: "active" },
   oguzhan: { id: "194743678", color: "#EB5A3C", status: "passive" },
   alper: { id: "376126308", color: "#FFE6A9", status: "passive" },
+  ramazan: { id: "381990871", color: "#AAB99A", status: "passive" },
 };
