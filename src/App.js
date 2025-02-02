@@ -63,7 +63,7 @@ function App() {
     // Generate dynamic buttons for each profile
     profileKeys &&
       profileKeys.forEach((key, index) => {
-        const baseId = index * 3 + 3; // Start from ID 3 for dynamic buttons to avoid overlap
+        const baseId = index * 4 + 3; // Start from ID 3 for dynamic buttons to avoid overlap
 
         buttons.push({
           id: baseId,
