@@ -14,23 +14,23 @@ const columns = [
   {
     id: "position",
     label: "Position",
-    minWidth: 170,
     align: "center",
     format: (value) => value,
+    flex: 1, // Ratio of 1
   },
   {
     id: "time",
     label: "Time Complete",
-    minWidth: 170,
     align: "center",
     format: (value) => floatToTime(value),
+    flex: 3, // Ratio of 3
   },
   {
     id: "name",
     label: "Player",
-    minWidth: 170,
     align: "center",
     format: (value) => value,
+    flex: 5, // Ratio of 5
   },
 ];
 
@@ -69,7 +69,7 @@ export default function MapRankTable({ name, count }) {
   };
 
   return (
-    <Paper sx={{ width: "100%" }}>
+    <Paper sx={{ width: "100%", borderRadius: 4 }}>
       <TableContainer>
         <TablePagination
           rowsPerPageOptions={[10, 25, 100, count > 100 ? count : null].filter(
@@ -89,7 +89,14 @@ export default function MapRankTable({ name, count }) {
                 <TableCell
                   key={column.id}
                   align={column.align}
-                  style={{ top: 57, minWidth: column.minWidth }}
+                  sx={{
+                    top: 57,
+                    flex: column.flex,
+                    minWidth: 0, // Allow flex to control width
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
                 >
                   {column.label}
                 </TableCell>
@@ -137,6 +144,17 @@ export default function MapRankTable({ name, count }) {
             ))}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 100, count > 100 ? count : null].filter(
+            Boolean
+          )}
+          component="div"
+          count={count}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </TableContainer>
     </Paper>
   );

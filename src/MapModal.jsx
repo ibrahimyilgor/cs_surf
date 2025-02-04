@@ -1,5 +1,5 @@
 import Paper from "@mui/material/Paper";
-import { Box, Modal, Grid2, styled } from "@mui/material";
+import { Box, Modal, Grid2, styled, Chip } from "@mui/material";
 import { useMemo } from "react";
 import MapRankTable from "./MapRankTable";
 
@@ -42,6 +42,7 @@ export default function MapModal({ open, handleClose, map }) {
           flexDirection: "column",
           alignItems: "center",
           overflowY: "auto",
+          borderRadius: 4,
         }}
       >
         <Grid2
@@ -61,9 +62,17 @@ export default function MapModal({ open, handleClose, map }) {
               height: "fit-content",
             }}
           >
-            <Item>
-              <b>{map?.name}</b>
-            </Item>
+            <Chip
+              label={map?.name}
+              sx={{
+                backgroundColor: "#155E95",
+                color: "white",
+                fontWeight: "bold",
+                margin: 0.5,
+                width: "60%",
+                cursor: "pointer",
+              }}
+            />
             <img
               src={`https://cdn.xplay.cloud/img/site/common/maps/${map?.name}.jpg`}
               style={{
@@ -71,6 +80,7 @@ export default function MapModal({ open, handleClose, map }) {
                 width: "60%",
                 topMargin: 4,
                 boxShadow: "rgba(0, 0, 0, 0.25) 1px 1px 1px 2px",
+                borderRadius: 10,
               }}
               alt={map?.name}
             />

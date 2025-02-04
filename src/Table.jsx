@@ -41,10 +41,18 @@ export default function BasicTable({
       sx={{
         maxHeight: `calc(100vh - ${topMargin}px)`,
         overflowY: "auto",
+        position: "relative", // Added to enable the sticky header
       }}
     >
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
-        <TableHead>
+        <TableHead
+          sx={{
+            position: "sticky", // Make header sticky
+            top: 0, // Stick it to the top
+            zIndex: 1, // Ensure it stays on top of the content
+            backgroundColor: "#fff", // Optional: Ensures the header has a white background to stand out
+          }}
+        >
           <TableRow>
             <TableCell sx={{ fontWeight: "bold" }} align="center">{`No (Count:${
               data?.length || 0
