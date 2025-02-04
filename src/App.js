@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import BasicTable from "./Table";
-import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import { MenuItem, FormControl, Chip, Box } from "@mui/material";
 import { TextField } from "@mui/material";
 import NameFilter from "./NameFilter";
 import { useAppContext } from "./AppContext";
+import { NestedMenuItem } from "mui-nested-menu";
+import { Menu } from "@mui/material";
 
 function App() {
   const { selectedProfiles } = useAppContext();
@@ -23,12 +25,23 @@ function App() {
 
   const topRef = useRef(null);
 
+  const [menuAnchor, setMenuAnchor] = useState(null);
+
+  const handleMenuOpen = (event) => {
+    setMenuAnchor(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+  };
+
   const buttonMap = useMemo(() => {
     const profileKeys = Object.keys(selectedProfiles);
 
     let buttons = [
       {
         id: 0,
+        level: 0,
         name: "ALL",
         onClick: (res) => {
           return res;
@@ -36,6 +49,7 @@ function App() {
       },
       {
         id: 1,
+        level: 0,
         name: "ALL FINISHED",
         onClick: (res) => {
           return res.filter((item) => {
@@ -48,6 +62,7 @@ function App() {
       },
       {
         id: 2,
+        level: 0,
         name: "NOONE FINISHED",
         onClick: (res) => {
           return res.filter((item) => {
@@ -67,6 +82,7 @@ function App() {
 
         buttons.push({
           id: baseId,
+          level: 1,
           name: `ONLY ${key.toUpperCase()} FINISHED`,
           onClick: (res) => {
             return res.filter((item) => {
@@ -85,6 +101,7 @@ function App() {
 
         buttons.push({
           id: baseId + 1,
+          level: 1,
           name: `${key.toUpperCase()} FINISHED`,
           onClick: (res) => {
             return res.filter((item) => {
@@ -98,6 +115,7 @@ function App() {
 
         buttons.push({
           id: baseId + 2,
+          level: 1,
           name: `${key.toUpperCase()} UNFINISHED`,
           onClick: (res) => {
             return res.filter((item) => {
@@ -107,15 +125,14 @@ function App() {
         });
 
         buttons.push({
-          id: baseId + 3, // Increment ID for each button to avoid duplicates
+          id: baseId + 3,
+          level: 1,
           name: `${key.toUpperCase()} IS BETTER`,
           onClick: (res) => {
             return res.filter((item) => {
-              // Compare the position of the specified profile against all other profiles
               return Object.keys(selectedProfiles).every((profile) => {
-                // Compare the current profile's position with others, ensuring the specified profile's position is always better
                 return (
-                  item[key]?.position <= (item[profile]?.position ?? Infinity) // Ensure specified profile's position is better
+                  item[key]?.position <= (item[profile]?.position ?? Infinity)
                 );
               });
             });
@@ -290,7 +307,8 @@ function App() {
   }, [selected, search, buttonMap, res]);
 
   return (
-    <div style={{ maxWidth: "100%" }}>
+    <div style={{ maxWidth: "100%", height: "100vh", overflow: "hidden" }}>
+      {" "}
       {/* Fixed Header */}
       <div
         ref={topRef} // Reference to the header element
@@ -309,18 +327,46 @@ function App() {
           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)", // Add shadow for visual separation
         }}
       >
-        <TextField
-          id="outlined-basic"
-          label="Map Name"
-          variant="outlined"
-          color="#212121"
-          value={search}
-          sx={{
-            marginRight: { xs: 0, sm: 1 },
-            width: { xs: "100%", sm: "auto" },
-          }} // 100% width on mobile, auto on larger screens
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <TextField
+            id="outlined-basic"
+            placeholder="Map Name"
+            variant="outlined"
+            color="primary"
+            value={search}
+            size="small"
+            sx={{
+              marginRight: { xs: 0, sm: 1 },
+              width: { xs: "100%", sm: "auto" },
+              borderRadius: 25, // Make it rounded like a chip
+              backgroundColor: "#f1f1f1", // Chip-like background color
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 25, // Ensure the text field input is rounded
+                "& fieldset": {
+                  borderColor: "#f1f1f1", // Keep border color as light gray
+                },
+                "&:hover fieldset": {
+                  borderColor: "#f1f1f1", // Keep border color the same when hovering
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#f1f1f1", // Prevent border color from turning blue when focused
+                },
+                "& input": {
+                  textAlign: "center", // Center the text inside the input field
+                },
+              },
+              "& .MuiInputLabel-root": {
+                position: "absolute",
+                top: "-10px", // Adjust label position to appear above the field
+                left: "10px",
+                fontSize: "12px", // Smaller font for label to match chip-like design
+                color: "#212121",
+              },
+            }}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </Box>
+
         <FormControl
           sx={{
             width: { xs: "100%", sm: "250px" },
@@ -328,30 +374,75 @@ function App() {
             justifyContent: "center",
           }}
         >
-          <InputLabel id="button-group-label">Filter</InputLabel>
-          <Select
-            labelId="button-group-label"
-            id="button-group"
-            value={selected}
-            onChange={(event) => setSelected(event.target.value)}
-            label="Select Option"
+          <Box
             sx={{
-              borderRadius: 2,
-              ".MuiSelect-outlined": {
-                borderColor: "#212121",
-              },
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            {buttonMap.map((button) => (
-              <MenuItem key={button.id} value={button.id}>
-                {button.name}
-              </MenuItem>
-            ))}
-          </Select>
+            <Chip
+              label={buttonMap[selected].name}
+              onClick={handleMenuOpen}
+              sx={{
+                backgroundColor: "#493628" || "gray",
+                color: "white",
+                fontWeight: "bold",
+                marginBottom: { xs: 1, sm: 0 },
+              }}
+            />
+            <Menu
+              anchorEl={menuAnchor}
+              open={Boolean(menuAnchor)}
+              onClose={() => setMenuAnchor(null)}
+            >
+              {/* Top-level menu items (fixed ones) */}
+              {buttonMap.slice(0, 3).map((button) => (
+                <MenuItem
+                  key={button.id}
+                  onClick={() => {
+                    setSelected(button.id);
+                    handleMenuClose();
+                  }}
+                >
+                  {button.name.toUpperCase()}
+                </MenuItem>
+              ))}
+
+              {/* Group dynamic buttons based on profile name */}
+              {Object.entries(
+                buttonMap.slice(3).reduce((acc, button) => {
+                  const words = button.name.split(" ");
+                  const profileName = words[0] === "ONLY" ? words[1] : words[0]; // Extract the correct profile
+
+                  if (!acc[profileName]) acc[profileName] = [];
+                  acc[profileName].push(button);
+                  return acc;
+                }, {})
+              ).map(([profile, buttons]) => (
+                <NestedMenuItem
+                  key={profile}
+                  label={profile.toUpperCase()}
+                  parentMenuOpen={Boolean(menuAnchor)}
+                >
+                  {buttons.map((button) => (
+                    <MenuItem
+                      key={button.id}
+                      onClick={() => {
+                        setSelected(button.id);
+                        handleMenuClose();
+                      }}
+                    >
+                      {button.name.toUpperCase()}
+                    </MenuItem>
+                  ))}
+                </NestedMenuItem>
+              ))}
+            </Menu>
+          </Box>
         </FormControl>
         <NameFilter />
       </div>
-
       {/* Content below the fixed header */}
       <div style={{ marginTop: topRef.current?.offsetHeight || 0 }}>
         {" "}
@@ -361,6 +452,7 @@ function App() {
           loading={loading}
           sort={sort}
           setSort={setSort}
+          topMargin={topRef.current?.offsetHeight || 0}
         />
       </div>
     </div>

@@ -9,6 +9,7 @@
     "@mui/material": "^6.4.0",
     "cra-template": "1.2.0",
     "material-table": "^2.0.6",
+    "mui-nested-menu": "^4.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-double-scrollbar": "github:IniterWorker/react-double-scrollbar",

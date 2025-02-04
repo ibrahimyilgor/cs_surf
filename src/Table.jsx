@@ -14,7 +14,13 @@ import TimeProgress from "./TimeProgress";
 import RankWinnerCell from "./RankWinnerCell";
 import { useAppContext } from "./AppContext";
 
-export default function BasicTable({ data, loading, setSort, sort }) {
+export default function BasicTable({
+  data,
+  loading,
+  setSort,
+  sort,
+  topMargin,
+}) {
   const { selectedProfiles } = useAppContext();
 
   const [openImage, setOpenImage] = React.useState(false);
@@ -30,7 +36,13 @@ export default function BasicTable({ data, loading, setSort, sort }) {
   };
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer
+      component={Paper}
+      sx={{
+        maxHeight: `calc(100vh - ${topMargin}px)`,
+        overflowY: "auto",
+      }}
+    >
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
@@ -77,7 +89,6 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 <TableCell
                   key={`${profile}-time-${index}`}
                   onClick={() => {
-                    // Dynamically handle sorting for each profile
                     if (sort === `${profile}TimeAsc`) {
                       setSort(`${profile}TimeDesc`);
                     } else if (sort === `${profile}TimeDesc`) {
@@ -112,7 +123,6 @@ export default function BasicTable({ data, loading, setSort, sort }) {
                 <TableCell
                   key={`${profile}-rank-${index}`}
                   onClick={() => {
-                    // Dynamically handle ranking sort for each profile
                     if (sort === `${profile}RankAsc`) {
                       setSort(`${profile}RankDesc`);
                     } else if (sort === `${profile}RankDesc`) {
