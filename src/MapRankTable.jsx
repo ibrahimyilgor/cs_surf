@@ -50,7 +50,6 @@ export default function MapRankTable({ name, count }) {
         );
         const mapData = await mapDataResponse.json();
         setRows(mapData?.data?.records || []);
-        console.log("Fetched data:", mapData);
       } catch (error) {
         console.error("Error fetching map data:", error);
       }

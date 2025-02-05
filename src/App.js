@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import BasicTable from "./Table";
-import { MenuItem, FormControl, Chip, Box } from "@mui/material";
+import { MenuItem, FormControl, Chip, Box, Modal } from "@mui/material";
 import { TextField } from "@mui/material";
 import NameFilter from "./NameFilter";
 import { useAppContext } from "./AppContext";
 import { NestedMenuItem } from "mui-nested-menu";
 import { Menu } from "@mui/material";
-
+import { profileInfo } from "./constants";
 function App() {
-  const { selectedProfiles } = useAppContext();
+  const [openOnlineFriends, setOpenOnlineFriends] = useState(false);
+
+  const handleOpenOnlineFriends = () => setOpenOnlineFriends(true);
+  const handleCloseOnlineFriends = () => setOpenOnlineFriends(false);
+
+  const { selectedProfiles, onlineFriendsData } = useAppContext();
   const [profiles, setProfiles] = useState({});
 
   const [maps, setMaps] = useState([]);
@@ -443,10 +448,8 @@ function App() {
         </FormControl>
         <NameFilter />
       </div>
-      {/* Content below the fixed header */}
       <div style={{ marginTop: topRef.current?.offsetHeight || 0 }}>
         {" "}
-        {/* Add top margin equal to the height of the fixed header */}
         <BasicTable
           data={row}
           loading={loading}
@@ -455,6 +458,86 @@ function App() {
           topMargin={topRef.current?.offsetHeight || 0}
         />
       </div>
+      <Chip
+        label={`Online Friends (${onlineFriendsData?.length || 0})`}
+        onClick={() =>
+          onlineFriendsData?.length > 0 ? handleOpenOnlineFriends() : null
+        }
+        sx={{
+          position: "fixed",
+          bottom: 20,
+          right: 20,
+          zIndex: 1000,
+          padding: "10px 20px",
+          fontSize: "16px",
+          backgroundColor: "green",
+          color: "white",
+        }}
+      />
+      {/* Modal */}
+      <Modal
+        open={openOnlineFriends}
+        onClose={() => handleCloseOnlineFriends()}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 80,
+            right: 20,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+            width: 400,
+            maxWidth: "80%",
+            flexDirection: "column",
+            display: "flex",
+          }}
+        >
+          {onlineFriendsData.map((friend) => {
+            return (
+              <>
+                <Chip
+                  label={
+                    Object.entries(profileInfo)
+                      .filter(
+                        ([key, val]) => val.id === friend.friendId.toString()
+                      )[0][0]
+                      .substring(0, 1)
+                      .toUpperCase() +
+                    Object.entries(profileInfo)
+                      .filter(
+                        ([key, val]) => val.id === friend.friendId.toString()
+                      )[0][0]
+                      .substring(1) +
+                    " - " +
+                    (friend?.serverData?.currentMap || "")
+                  }
+                  onClick={() => {
+                    var serverIp = friend?.serverData?.IP;
+                    var serverPort = friend?.serverData?.port;
+
+                    var steamUrl = `steam://connect/${serverIp}:${serverPort}`;
+                    window.location.href = steamUrl;
+                  }}
+                  sx={{
+                    backgroundColor:
+                      Object.values(profileInfo).filter(
+                        (pr) => pr.id === friend.friendId.toString()
+                      )[0]?.color || "gray",
+                    color: "white",
+                    fontWeight: "bold",
+                    margin: 0.5,
+                    cursor: "pointer",
+                  }}
+                />
+              </>
+            );
+          })}
+        </Box>
+      </Modal>
     </div>
   );
 }
