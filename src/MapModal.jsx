@@ -1,5 +1,5 @@
-import Paper from "@mui/material/Paper";
-import { Box, Modal, Grid2, styled, Chip } from "@mui/material";
+// import Paper from "@mui/material/Paper";
+import { Box, Modal, Grid2, Chip } from "@mui/material";
 import { useMemo } from "react";
 import MapRankTable from "./MapRankTable";
 
@@ -8,22 +8,22 @@ export default function MapModal({ open, handleClose, map }) {
     return map?.mapData;
   }, [map]);
 
-  const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: "#fff",
-    ...theme.typography.body2,
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-    textAlign: "center",
-    color: theme.palette.text.secondary,
-    ...theme.applyStyles("dark", {
-      backgroundColor: "#1A2027",
-    }),
-    overflow: "hidden",
-    width: "60%",
-    borderBottomRightRadius: 0,
-    borderBottomLeftRadius: 0,
-    boxShadow: "rgba(0, 0, 0, 0.2) 1px 1px 1px 2px",
-  }));
+  // const Item = styled(Paper)(({ theme }) => ({
+  //   backgroundColor: "#fff",
+  //   ...theme.typography.body2,
+  //   paddingTop: theme.spacing(1),
+  //   paddingBottom: theme.spacing(1),
+  //   textAlign: "center",
+  //   color: theme.palette.text.secondary,
+  //   ...theme.applyStyles("dark", {
+  //     backgroundColor: "#1A2027",
+  //   }),
+  //   overflow: "hidden",
+  //   width: "60%",
+  //   borderBottomRightRadius: 0,
+  //   borderBottomLeftRadius: 0,
+  //   boxShadow: "rgba(0, 0, 0, 0.2) 1px 1px 1px 2px",
+  // }));
 
   return (
     <Modal open={open} onClose={handleClose}>

@@ -59,7 +59,7 @@ export const AppContextProvider = ({ children }) => {
 
     // Cleanup function to clear the interval when the component unmounts
     return () => clearInterval(intervalId);
-  }, [profileInfo]); // Dependency array ensures this effect is called whenever profileInfo changes
+  }, []); // Dependency array ensures this effect is called whenever profileInfo changes
 
   return (
     <AppContext.Provider
