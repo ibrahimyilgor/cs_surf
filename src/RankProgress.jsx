@@ -14,7 +14,16 @@ const RankProgress = ({ rank, total, name, otherRanks = [] }) => {
     position: profile.position,
   }));
 
-  if (!rank) return null;
+  if (!rank)
+    return (
+      <Typography
+        variant="body2"
+        align="center"
+        sx={{ marginTop: 1.5, fontWeight: "bold" }}
+      >
+        / {total}
+      </Typography>
+    );
 
   return (
     <Box sx={{ position: "relative", width: "100%" }}>
