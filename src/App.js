@@ -8,6 +8,8 @@ import { useAppContext } from "./AppContext";
 import { NestedMenuItem } from "mui-nested-menu";
 import { Menu } from "@mui/material";
 import { profileInfo } from "./constants";
+import { GlobalStyles } from '@mui/material';
+
 function App() {
   const [openOnlineFriends, setOpenOnlineFriends] = useState(false);
 
@@ -313,6 +315,14 @@ function App() {
 
   return (
     <div style={{ maxWidth: "100%", height: "100vh", overflow: "hidden" }}>
+      <GlobalStyles
+        styles={{
+          '.MuiNestedMenuItem-subMenu': {
+            backgroundColor: '#493628 !important',
+            borderRadius: '25px !important',
+          },
+        }}
+      />
       {" "}
       {/* Fixed Header */}
       <div
@@ -400,6 +410,57 @@ function App() {
               anchorEl={menuAnchor}
               open={Boolean(menuAnchor)}
               onClose={() => setMenuAnchor(null)}
+              PaperProps={{
+                sx: {
+                  mt: 1,
+                  backgroundColor: '#493628',
+                  color: 'white',
+                  borderRadius: '25px',
+                  '& .MuiMenuItem-root': {
+                    padding: '8px 16px',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '&:first-of-type': {
+                      borderTopLeftRadius: '25px',
+                      borderTopRightRadius: '25px',
+                    },
+                    '&:last-of-type': {
+                      borderBottomLeftRadius: '25px',
+                      borderBottomRightRadius: '25px',
+                    },
+                  },
+                  '& .MuiNestedMenuItem-root': {
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                  },
+                  '& .MuiNestedMenuItem-subMenu': {
+                    backgroundColor: '#493628',
+                    borderRadius: '25px',
+                    '& .MuiMenuItem-root': {
+                      padding: '8px 16px',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      },
+                      '&:first-of-type': {
+                        borderTopLeftRadius: '25px',
+                        borderTopRightRadius: '25px',
+                      },
+                      '&:last-of-type': {
+                        borderBottomLeftRadius: '25px',
+                        borderBottomRightRadius: '25px',
+                      },
+                    },
+                  },
+                },
+              }}
+              sx={{
+                '& .MuiPaper-root': {
+                  backgroundColor: '#493628',
+                  borderRadius: '25px',
+                },
+              }}
             >
               {/* Top-level menu items (fixed ones) */}
               {buttonMap.slice(0, 3).map((button) => (
@@ -409,10 +470,34 @@ function App() {
                     setSelected(button.id);
                     handleMenuClose();
                   }}
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                  }}
                 >
-                  {button.name.toUpperCase()}
+                  {button.name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                 </MenuItem>
               ))}
+
+              {/* Separator */}
+              <MenuItem
+                sx={{
+                  padding: '4px 16px',
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                  },
+                  cursor: 'default',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '1px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  }}
+                />
+              </MenuItem>
 
               {/* Group dynamic buttons based on profile name */}
               {Object.entries(
@@ -427,20 +512,62 @@ function App() {
               ).map(([profile, buttons]) => (
                 <NestedMenuItem
                   key={profile}
-                  label={profile.toUpperCase()}
+                  label={profile.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                   parentMenuOpen={Boolean(menuAnchor)}
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '& .MuiNestedMenuItem-label': {
+                      color: 'white',
+                    },
+                    backgroundColor: selectedProfiles[profile.toLowerCase()]?.color || '#493628',
+                    margin: '0 8px 4px 8px',
+                    borderRadius: '4px',
+                    '& .MuiNestedMenuItem-subMenu': {
+                      backgroundColor: '#493628',
+                      borderRadius: '25px',
+                      '& .MuiMenuItem-root': {
+                        padding: '8px 16px',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        },
+                        '&:first-of-type': {
+                          borderTopLeftRadius: '25px',
+                          borderTopRightRadius: '25px',
+                        },
+                        '&:last-of-type': {
+                          borderBottomLeftRadius: '25px',
+                          borderBottomRightRadius: '25px',
+                        },
+                      },
+                    },
+                  }}
                 >
-                  {buttons.map((button) => (
-                    <MenuItem
-                      key={button.id}
-                      onClick={() => {
-                        setSelected(button.id);
-                        handleMenuClose();
-                      }}
-                    >
-                      {button.name.toUpperCase()}
-                    </MenuItem>
-                  ))}
+                  {buttons.map((button) => {
+                    const words = button.name.split(" ");
+                    const profileName = words[0] === "ONLY" ? words[1] : words[0];
+                    return (
+                      <MenuItem
+                        key={button.id}
+                        onClick={() => {
+                          setSelected(button.id);
+                          handleMenuClose();
+                        }}
+                        sx={{
+                          '&:hover': {
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                          },
+                          color: 'white',
+                          backgroundColor: selectedProfiles[profileName.toLowerCase()]?.color || '#493628',
+                          margin: '0 8px 4px 8px',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        {button.name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
+                      </MenuItem>
+                    );
+                  })}
                 </NestedMenuItem>
               ))}
             </Menu>
