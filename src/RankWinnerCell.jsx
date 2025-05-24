@@ -20,7 +20,7 @@ const RankWinnerCell = ({ row }) => {
   );
 
   // If only one profile is selected, show the player's rank
-  if (selectedProfiles.length === 1) {
+  if (Object.keys(selectedProfiles).length === 1) {
     return (
       <Typography variant="body2" align="center">
         {winner.name.charAt(0).toUpperCase() + winner.name.slice(1)}'s Rank:{" "}
