@@ -154,6 +154,9 @@ function App() {
     setSelected(0);
   }, [selectedProfiles]);
 
+  // Cache for map details to avoid refetching
+  const mapCacheRef = useRef(new Map());
+
   useEffect(() => {
     const fetchMaps = async () => {
       try {
@@ -165,23 +168,47 @@ function App() {
 
         if (!mapsData?.data?.surf) throw new Error("No maps found");
 
-        // Fetch details for each map
-        const mapDetailsPromises = mapsData.data.surf.map(async (map) => {
-          const mapDataResponse = await fetch(
-            `https://surf.xplay.gg/api/leaderboard/data?mapName=${map}&page=1&limit=1000000`
-          );
-          const mapData = await mapDataResponse.json();
-
-          return {
-            name: map,
-            finishedCount: mapData?.data?.records?.length || 0,
-            wr: mapData?.data?.records[0]?.time || 0,
-            mapData: mapData?.data?.records,
-          };
-        });
-
-        // Wait for all map fetches to complete
-        const tempMaps = await Promise.all(mapDetailsPromises);
+        const mapNames = mapsData.data.surf;
+        
+        // Batch fetch map details in chunks to avoid overwhelming the server
+        const BATCH_SIZE = 10;
+        const tempMaps = [];
+        
+        for (let i = 0; i < mapNames.length; i += BATCH_SIZE) {
+          const batch = mapNames.slice(i, i + BATCH_SIZE);
+          
+          const batchPromises = batch.map(async (map) => {
+            // Check cache first
+            if (mapCacheRef.current.has(map)) {
+              return mapCacheRef.current.get(map);
+            }
+            
+            try {
+              const mapDataResponse = await fetch(
+                `https://surf.xplay.gg/api/leaderboard/data?mapName=${map}&page=1&limit=100`
+              );
+              const mapData = await mapDataResponse.json();
+              
+              const mapResult = {
+                name: map,
+                finishedCount: mapData?.data?.totalCount || mapData?.data?.records?.length || 0,
+                wr: mapData?.data?.records?.[0]?.time || 0,
+                mapData: mapData?.data?.records || [],
+              };
+              
+              // Cache the result
+              mapCacheRef.current.set(map, mapResult);
+              return mapResult;
+            } catch (err) {
+              console.error(`Error fetching map ${map}:`, err);
+              return { name: map, finishedCount: 0, wr: 0, mapData: [] };
+            }
+          });
+          
+          const batchResults = await Promise.all(batchPromises);
+          tempMaps.push(...batchResults);
+        }
+        
         setMaps(tempMaps);
       } catch (error) {
         console.error("Error fetching maps:", error);
@@ -190,113 +217,151 @@ function App() {
 
     const fetchData = async () => {
       setLoading(true); // Start loading
-      await Promise.all([fetchMaps()]);
+      await fetchMaps();
       setLoading(false); // Stop loading
     };
 
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const fetchProfiles = async () => {
-      try {
-        const profilePromises = Object.entries(selectedProfiles).map(
-          async ([name, info]) => {
-            const response = await fetch(
-              `https://surf.xplay.gg/api/leaderboard/profile?accountId=${info?.id}`
-            );
-            const data = await response.json();
-            return { name, records: data?.data?.records?.surf };
-          }
-        );
-
-        const profilesArray = await Promise.all(profilePromises);
-
-        // Update profiles state dynamically
-        const profilesObject = profilesArray.reduce(
-          (acc, { name, records }) => ({ ...acc, [name]: records }),
-          {}
-        );
-
-        setProfiles(profilesObject);
-      } catch (error) {
-        console.error("Error fetching profiles:", error);
-      }
-    };
-
-    const fetchData = async () => {
-      setLoading(true); // Start loading
-      await Promise.all([fetchProfiles()]);
-      setLoading(false); // Stop loading
-    };
-
-    fetchData();
-  }, [selectedProfiles]);
+  // Cache for profile data
+  const profileCacheRef = useRef(new Map());
+  const fetchTimeoutRef = useRef(null);
 
   useEffect(() => {
-    if (profiles && maps) {
-      let tempRes = [];
-      maps.forEach((map) => {
-        const mapData = Object.entries(profiles).reduce(
-          (acc, [name, records]) => {
-            const userMap = records?.find((record) => record.map === map.name);
-            return { ...acc, [name]: userMap };
-          },
-          {}
-        );
-        tempRes.push({ ...mapData, map });
-      });
+    // Debounce profile fetching to avoid rapid successive calls
+    if (fetchTimeoutRef.current) {
+      clearTimeout(fetchTimeoutRef.current);
+    }
 
-      const sortingFunctions = {
-        nameAsc: (a, b) => a?.map?.name?.localeCompare(b?.map?.name),
-        nameDesc: (a, b) => b?.map?.name?.localeCompare(a?.map?.name),
-        finishedCount: (a, b) => b?.map?.finishedCount - a?.map?.finishedCount,
-        worldRecordAsc: (a, b) =>
-          parseFloat(a?.map?.wr) - parseFloat(b?.map?.wr),
-        worldRecordDesc: (a, b) =>
-          parseFloat(b?.map?.wr) - parseFloat(a?.map?.wr),
-      };
+    fetchTimeoutRef.current = setTimeout(async () => {
+      const fetchProfiles = async () => {
+        try {
+          const profilePromises = Object.entries(selectedProfiles).map(
+            async ([name, info]) => {
+              const cacheKey = `${name}-${info?.id}`;
+              
+              // Check cache first (cache valid for 5 minutes)
+              const cached = profileCacheRef.current.get(cacheKey);
+              if (cached && Date.now() - cached.timestamp < 300000) {
+                return { name, records: cached.records };
+              }
+              
+              const response = await fetch(
+                `https://surf.xplay.gg/api/leaderboard/profile?accountId=${info?.id}`
+              );
+              const data = await response.json();
+              const records = data?.data?.records?.surf;
+              
+              // Cache the result
+              profileCacheRef.current.set(cacheKey, {
+                records,
+                timestamp: Date.now()
+              });
+              
+              return { name, records };
+            }
+          );
 
-      // Dynamically add sorting logic for each ID in IDS
-      Object.keys(selectedProfiles).forEach((key) => {
-        sortingFunctions[`${key}TimeAsc`] = (a, b) =>
-          parseFloat(a?.[key]?.time || Infinity) -
-          parseFloat(b?.[key]?.time || Infinity);
+          const profilesArray = await Promise.all(profilePromises);
 
-        sortingFunctions[`${key}TimeDesc`] = (a, b) =>
-          parseFloat(b?.[key]?.time || Infinity) -
-          parseFloat(a?.[key]?.time || Infinity);
+          // Update profiles state dynamically
+          const profilesObject = profilesArray.reduce(
+            (acc, { name, records }) => ({ ...acc, [name]: records }),
+            {}
+          );
 
-        sortingFunctions[`${key}TimeWrDiffAsc`] = (a, b) =>
-          parseFloat((a?.[key]?.time || Infinity) - a?.map?.wr) -
-          parseFloat((b?.[key]?.time || Infinity) - b?.map?.wr);
-
-        sortingFunctions[`${key}TimeWrDiffDesc`] = (a, b) =>
-          parseFloat((b?.[key]?.time || Infinity) - b?.map?.wr) -
-          parseFloat((a?.[key]?.time || Infinity) - a?.map?.wr);
-
-        sortingFunctions[`${key}RankAsc`] = (a, b) =>
-          parseFloat(a?.[key]?.position || Infinity) -
-          parseFloat(b?.[key]?.position || Infinity);
-
-        sortingFunctions[`${key}RankDesc`] = (a, b) =>
-          parseFloat(b?.[key]?.position || Infinity) -
-          parseFloat(a?.[key]?.position || Infinity);
-      });
-
-      // Sorting handler
-      const handleSort = () => {
-        const sortFunction = sortingFunctions[sort];
-        if (sortFunction) {
-          setRes([...tempRes].sort(sortFunction));
-        } else {
-          setRes(tempRes);
+          setProfiles(profilesObject);
+        } catch (error) {
+          console.error("Error fetching profiles:", error);
         }
       };
 
-      handleSort();
+      setLoading(true);
+      await fetchProfiles();
+      setLoading(false);
+    }, 300); // 300ms debounce
+
+    return () => {
+      if (fetchTimeoutRef.current) {
+        clearTimeout(fetchTimeoutRef.current);
+      }
+    };
+  }, [selectedProfiles]);
+
+  // Memoize the combined profile-map data to avoid recalculating on every sort
+  const combinedData = useMemo(() => {
+    if (!profiles || !maps || maps.length === 0) return [];
+    
+    // Build a lookup map for faster profile record searching
+    const profileLookups = {};
+    Object.entries(profiles).forEach(([name, records]) => {
+      profileLookups[name] = new Map();
+      records?.forEach((record) => {
+        profileLookups[name].set(record.map, record);
+      });
+    });
+    
+    return maps.map((map) => {
+      const mapData = Object.keys(profiles).reduce((acc, name) => {
+        const userMap = profileLookups[name]?.get(map.name);
+        return { ...acc, [name]: userMap };
+      }, {});
+      return { ...mapData, map };
+    });
+  }, [profiles, maps]);
+
+  // Memoize sorting functions
+  const sortingFunctions = useMemo(() => {
+    const funcs = {
+      nameAsc: (a, b) => a?.map?.name?.localeCompare(b?.map?.name),
+      nameDesc: (a, b) => b?.map?.name?.localeCompare(a?.map?.name),
+      finishedCount: (a, b) => b?.map?.finishedCount - a?.map?.finishedCount,
+      worldRecordAsc: (a, b) =>
+        parseFloat(a?.map?.wr) - parseFloat(b?.map?.wr),
+      worldRecordDesc: (a, b) =>
+        parseFloat(b?.map?.wr) - parseFloat(a?.map?.wr),
+    };
+
+    Object.keys(selectedProfiles).forEach((key) => {
+      funcs[`${key}TimeAsc`] = (a, b) =>
+        parseFloat(a?.[key]?.time || Infinity) -
+        parseFloat(b?.[key]?.time || Infinity);
+
+      funcs[`${key}TimeDesc`] = (a, b) =>
+        parseFloat(b?.[key]?.time || Infinity) -
+        parseFloat(a?.[key]?.time || Infinity);
+
+      funcs[`${key}TimeWrDiffAsc`] = (a, b) =>
+        parseFloat((a?.[key]?.time || Infinity) - a?.map?.wr) -
+        parseFloat((b?.[key]?.time || Infinity) - b?.map?.wr);
+
+      funcs[`${key}TimeWrDiffDesc`] = (a, b) =>
+        parseFloat((b?.[key]?.time || Infinity) - b?.map?.wr) -
+        parseFloat((a?.[key]?.time || Infinity) - a?.map?.wr);
+
+      funcs[`${key}RankAsc`] = (a, b) =>
+        parseFloat(a?.[key]?.position || Infinity) -
+        parseFloat(b?.[key]?.position || Infinity);
+
+      funcs[`${key}RankDesc`] = (a, b) =>
+        parseFloat(b?.[key]?.position || Infinity) -
+        parseFloat(a?.[key]?.position || Infinity);
+    });
+
+    return funcs;
+  }, [selectedProfiles]);
+
+  useEffect(() => {
+    if (combinedData.length > 0) {
+      const sortFunction = sortingFunctions[sort];
+      if (sortFunction) {
+        setRes([...combinedData].sort(sortFunction));
+      } else {
+        setRes(combinedData);
+      }
     }
-  }, [profiles, maps, sort, selectedProfiles]);
+  }, [combinedData, sort, sortingFunctions]);
 
   useEffect(() => {
     let tempRes = [...res];

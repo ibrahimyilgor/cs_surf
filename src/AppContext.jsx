@@ -16,50 +16,72 @@ export const AppContextProvider = ({ children }) => {
       }, {})
   );
   useEffect(() => {
+    // AbortController for cleanup
+    let abortController = new AbortController();
+    
     const fetchOnlineFriends = async () => {
       try {
-        let tempFriends = [];
-        const onlineFriendsPromises = Object.entries(profileInfo).map(
+        // Only fetch for active profiles to reduce API calls
+        const activeProfiles = Object.entries(profileInfo).filter(
+          ([_, { status }]) => status === "active"
+        );
+        
+        if (activeProfiles.length === 0) {
+          setOnlineFriendsData([]);
+          return;
+        }
+
+        // Fetch profiles in parallel with abort signal
+        const onlineFriendsPromises = activeProfiles.map(
           async ([name, info]) => {
             const response = await fetch(
-              `https://xplay.gg/api/accounts/profileGeneral/${info?.id}`
+              `https://xplay.gg/api/accounts/profileGeneral/${info?.id}`,
+              { signal: abortController.signal }
             );
             const data = await response.json();
             return { data };
           }
         );
 
-        tempFriends = [
+        const results = await Promise.all(onlineFriendsPromises);
+        
+        // Pre-compute profileInfo IDs for faster lookup
+        const profileIds = new Set(Object.values(profileInfo).map((pr) => pr.id));
+        
+        const tempFriends = [
           ...new Map(
-            (await Promise.all(onlineFriendsPromises))
+            results
               .map((profile) => profile?.data?.friends || [])
               .flat()
               .filter(
                 (friend) =>
-                  Object.values(profileInfo)
-                    .map((pr) => pr.id)
-                    .includes(friend.friendId.toString()) // Filter based on friendId
+                  profileIds.has(friend.friendId.toString()) &&
+                  !!friend?.serverData
               )
-              .filter((friend2) => !!friend2?.serverData)
-              .map((friend) => [friend.friendId, friend]) // Map to [friendId, friend] after filtering
+              .map((friend) => [friend.friendId, friend])
           ).values(),
         ];
 
         setOnlineFriendsData(tempFriends);
       } catch (error) {
-        console.error("Error fetching profiles:", error);
+        if (error.name !== 'AbortError') {
+          console.error("Error fetching profiles:", error);
+        }
       }
     };
 
     // Call the function immediately when the component mounts
     fetchOnlineFriends();
 
-    // Set interval to call fetchOnlineFriends every 10 seconds (10000ms)
-    const intervalId = setInterval(fetchOnlineFriends, 10000);
+    // Set interval to call fetchOnlineFriends every 30 seconds (reduced from 10s)
+    const intervalId = setInterval(fetchOnlineFriends, 30000);
 
-    // Cleanup function to clear the interval when the component unmounts
-    return () => clearInterval(intervalId);
-  }, []); // Dependency array ensures this effect is called whenever profileInfo changes
+    // Cleanup function to clear the interval and abort pending requests
+    return () => {
+      clearInterval(intervalId);
+      abortController.abort();
+    };
+  }, []);
 
   return (
     <AppContext.Provider

@@ -1,9 +1,13 @@
+import React from "react";
 import { Box, LinearProgress } from "@mui/material";
 import { floatToTime } from "./utils";
 import { useAppContext } from "./AppContext";
 
-const TimeProgress = ({ colTime = 0, otherTime = [], wr, name }) => {
+const TimeProgress = React.memo(({ colTime = 0, otherTime = [], wr, name }) => {
   const { selectedProfiles } = useAppContext();
+
+  // Clamp values between 0 and 100
+  const clamp = (value) => Math.max(0, Math.min(100, value));
 
   const validOtherTimes = otherTime.filter((ot) => ot.time && ot.time > 0);
 
@@ -15,12 +19,12 @@ const TimeProgress = ({ colTime = 0, otherTime = [], wr, name }) => {
   const minValue = wr || 0;
   const safeDenominator = maxValue - minValue || 1; // Prevent division by zero.
 
-  const colValue = colTime ? ((colTime - minValue) * 100) / safeDenominator : 0;
+  const colValue = colTime ? clamp(((colTime - minValue) * 100) / safeDenominator) : 0;
   const otherValues = validOtherTimes.map((profile) => ({
     name:
       profile.key.substring(0, 1).toUpperCase() +
       profile.key.substring(1).toLowerCase(),
-    value: ((profile.time - minValue) * 100) / safeDenominator,
+    value: clamp(((profile.time - minValue) * 100) / safeDenominator),
     time: profile.time,
   }));
 
@@ -142,6 +146,6 @@ const TimeProgress = ({ colTime = 0, otherTime = [], wr, name }) => {
       </div>
     </Box>
   );
-};
+});
 
 export default TimeProgress;

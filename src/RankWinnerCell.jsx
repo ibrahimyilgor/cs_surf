@@ -1,7 +1,8 @@
+import React from "react";
 import { Chip, Avatar, Typography } from "@mui/material";
 import { useAppContext } from "./AppContext";
 
-const RankWinnerCell = ({ row }) => {
+const RankWinnerCell = React.memo(({ row }) => {
   const { selectedProfiles } = useAppContext();
 
   // Extract positions from row, filter out players without position
@@ -43,6 +44,6 @@ const RankWinnerCell = ({ row }) => {
       }}
     />
   );
-};
+});
 
 export default RankWinnerCell;
