@@ -252,7 +252,7 @@ export default function BasicTable({
   );
 }
 
-const TimeColumn = ({ colTime, name, otherTime, wr }) => {
+const TimeColumn = React.memo(({ colTime, name, otherTime, wr }) => {
   return (
     <div
       style={{
@@ -274,4 +274,4 @@ const TimeColumn = ({ colTime, name, otherTime, wr }) => {
       </div>
     </div>
   );
-};
+});

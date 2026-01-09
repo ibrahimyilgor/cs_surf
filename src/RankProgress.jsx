@@ -1,16 +1,20 @@
+import React from "react";
 import { Box, LinearProgress, Typography } from "@mui/material";
 import { useAppContext } from "./AppContext";
 
-const RankProgress = ({ rank, total, name, otherRanks = [] }) => {
+const RankProgress = React.memo(({ rank, total, name, otherRanks = [] }) => {
   const { selectedProfiles } = useAppContext();
 
-  const progressValue = rank ? ((total - rank) * 100) / total : 0;
+  // Clamp values between 0 and 100
+  const clamp = (value) => Math.max(0, Math.min(100, value));
+
+  const progressValue = rank ? clamp(((total - rank) * 100) / total) : 0;
 
   const otherProgressValues = otherRanks.map((profile) => ({
     name:
       profile.key.substring(0, 1).toUpperCase() +
       profile.key.substring(1).toLowerCase(),
-    value: ((total - profile.position) * 100) / total,
+    value: clamp(((total - profile.position) * 100) / total),
     position: profile.position,
   }));
 
@@ -147,6 +151,6 @@ const RankProgress = ({ rank, total, name, otherRanks = [] }) => {
       </Box>
     </Box>
   );
-};
+});
 
 export default RankProgress;
