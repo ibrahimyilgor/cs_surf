@@ -162,7 +162,7 @@ function App() {
       try {
         // Fetch the list of maps
         const mapsResponse = await fetch(
-          "https://surf.xplay.gg/api/leaderboard/maps"
+          "/api/leaderboard/maps"
         );
         const mapsData = await mapsResponse.json();
 
@@ -185,7 +185,7 @@ function App() {
             
             try {
               const mapDataResponse = await fetch(
-                `https://surf.xplay.gg/api/leaderboard/data?mapName=${map}&page=1&limit=100`
+                `/api/leaderboard/data?mapName=${map}&page=1&limit=100`
               );
               const mapData = await mapDataResponse.json();
               
@@ -248,7 +248,7 @@ function App() {
               }
               
               const response = await fetch(
-                `https://surf.xplay.gg/api/leaderboard/profile?accountId=${info?.id}`
+                `/api/leaderboard/profile?accountId=${info?.id}`
               );
               const data = await response.json();
               const records = data?.data?.records?.surf;

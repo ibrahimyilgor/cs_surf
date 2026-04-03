@@ -35,7 +35,7 @@ export const AppContextProvider = ({ children }) => {
         const onlineFriendsPromises = activeProfiles.map(
           async ([name, info]) => {
             const response = await fetch(
-              `https://xplay.gg/api/accounts/profileGeneral/${info?.id}`,
+              `/api/accounts/profileGeneral/${info?.id}`,
               { signal: abortController.signal }
             );
             const data = await response.json();

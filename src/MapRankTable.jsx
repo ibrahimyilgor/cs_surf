@@ -44,7 +44,7 @@ export default function MapRankTable({ name, count }) {
     const fetchData = async () => {
       try {
         const mapDataResponse = await fetch(
-          `https://surf.xplay.gg/api/leaderboard/data?mapName=${
+          `/api/leaderboard/data?mapName=${
             name || ""
           }&page=${page + 1}&limit=${rowsPerPage}`
         );
