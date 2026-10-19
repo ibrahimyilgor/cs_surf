@@ -1,95 +1,69 @@
 import React, { useContext, useEffect, useState } from "react";
 import { profileInfo } from "./constants";
 
-const AppContext = React.createContext({});
+const AppContext = React.createContext(null);
 
 export default AppContext;
 
 export const AppContextProvider = ({ children }) => {
-  const [onlineFriendsData, setOnlineFriendsData] = useState([]);
-  const [selectedProfiles, setSelectedProfiles] = useState(
+  const [profilesData, setProfilesData] = useState({});
+  const [selectedProfiles, setSelectedProfiles] = useState(() =>
     Object.entries(profileInfo)
-      .filter(([_, { status }]) => status === "active") // Filter active profiles
-      .reduce((acc, [name, profile]) => {
-        acc[name] = profile;
-        return acc;
-      }, {})
+      .filter(([, profile]) => profile.status === "active")
+      .reduce((selected, [name, profile]) => {
+        selected[name] = profile;
+        return selected;
+      }, {}),
   );
+
   useEffect(() => {
-    // AbortController for cleanup
-    let abortController = new AbortController();
-    
-    const fetchOnlineFriends = async () => {
-      try {
-        // Only fetch for active profiles to reduce API calls
-        const activeProfiles = Object.entries(profileInfo).filter(
-          ([_, { status }]) => status === "active"
-        );
-        
-        if (activeProfiles.length === 0) {
-          setOnlineFriendsData([]);
-          return;
-        }
+    let active = true;
+    let timer;
+    let controller;
 
-        // Fetch profiles in parallel with abort signal
-        const onlineFriendsPromises = activeProfiles.map(
-          async ([name, info]) => {
+    async function loadProfiles() {
+      controller = new AbortController();
+      const results = await Promise.all(
+        Object.entries(profileInfo).map(async ([name, profile]) => {
+          try {
             const response = await fetch(
-              `/api/accounts/profileGeneral/${info?.id}`,
-              { signal: abortController.signal }
+              `/api/accounts/profileGeneral/${profile.id}`,
+              { signal: controller.signal },
             );
+            if (!response.ok) {
+              throw new Error(`Profil isteği başarısız (${response.status})`);
+            }
             const data = await response.json();
-            return { data };
+            return { name, data };
+          } catch (error) {
+            if (error.name === "AbortError") return null;
+            return { name, error: error.message || "Profil bilgisi alınamadı." };
           }
+        }),
+      );
+
+      if (active) {
+        setProfilesData(
+          results.reduce((profiles, result) => {
+            if (result) profiles[result.name] = result;
+            return profiles;
+          }, {}),
         );
-
-        const results = await Promise.all(onlineFriendsPromises);
-        
-        // Pre-compute profileInfo IDs for faster lookup
-        const profileIds = new Set(Object.values(profileInfo).map((pr) => pr.id));
-        
-        const tempFriends = [
-          ...new Map(
-            results
-              .map((profile) => profile?.data?.friends || [])
-              .flat()
-              .filter(
-                (friend) =>
-                  profileIds.has(friend.friendId.toString()) &&
-                  !!friend?.serverData
-              )
-              .map((friend) => [friend.friendId, friend])
-          ).values(),
-        ];
-
-        setOnlineFriendsData(tempFriends);
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          console.error("Error fetching profiles:", error);
-        }
+        timer = setTimeout(loadProfiles, 60000);
       }
-    };
+    }
 
-    // Call the function immediately when the component mounts
-    fetchOnlineFriends();
-
-    // Set interval to call fetchOnlineFriends every 30 seconds (reduced from 10s)
-    const intervalId = setInterval(fetchOnlineFriends, 30000);
-
-    // Cleanup function to clear the interval and abort pending requests
+    loadProfiles();
     return () => {
-      clearInterval(intervalId);
-      abortController.abort();
+      active = false;
+      clearTimeout(timer);
+      controller?.abort();
     };
   }, []);
 
   return (
     <AppContext.Provider
-      value={{
-        selectedProfiles,
-        setSelectedProfiles,
-        onlineFriendsData,
-      }}
+      value={{ selectedProfiles, setSelectedProfiles, profilesData }}
     >
       {children}
     </AppContext.Provider>
